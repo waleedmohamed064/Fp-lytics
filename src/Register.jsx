@@ -1,16 +1,19 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff, Loader2, Lock, Mail, Shield } from "lucide-react";
-import { loginUser } from "./api";
+import { Eye, EyeOff, Loader2, Lock, Mail, Shield, User } from "lucide-react";
+import { registerUser } from "./api";
 
 const INITIAL_FORM_STATE = {
+  username: "",
   email: "",
   password: "",
+  confirmPassword: "",
 };
 
-function Login() {
+function Register() {
   const [formData, setFormData] = useState(INITIAL_FORM_STATE);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
@@ -30,8 +33,18 @@ function Login() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!formData.email || !formData.password) {
-      setErrorMessage("Please enter both email and password.");
+    if (!formData.email || !formData.password || !formData.username) {
+      setErrorMessage("Please fill in all fields.");
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setErrorMessage("Passwords do not match.");
+      return;
+    }
+
+    if (formData.password.length < 8) {
+      setErrorMessage("Password must be at least 8 characters long.");
       return;
     }
 
@@ -39,13 +52,14 @@ function Login() {
     setErrorMessage("");
 
     try {
-      // API Integration: http://127.0.0.1:8000/api/login/
-      const response = await loginUser({
+      // API Integration: http://127.0.0.1:8000/api/register/
+      const response = await registerUser({
+        username: formData.username,
         email: formData.email,
         password: formData.password,
       });
 
-      // Store auth token
+      // Store auth token if provided
       if (response.token) {
         localStorage.setItem("authToken", response.token);
       }
@@ -54,20 +68,15 @@ function Login() {
       navigate("/");
     } catch (error) {
       setErrorMessage(
-        error.message || "Unable to sign in right now. Please try again.",
+        error.message || "Unable to create account. Please try again.",
       );
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleSocialLogin = (provider) => {
-    // OAuth integration point - implement social login flow here
-    console.log(`${provider} login clicked`);
-  };
-
-  const handleSignUp = () => {
-    navigate("/register");
+  const handleBackToLogin = () => {
+    navigate("/login");
   };
 
   return (
@@ -94,14 +103,38 @@ function Login() {
           <section className="rounded-3xl border border-[#3d245b] bg-[#1e102f] px-5 py-6 shadow-[0_20px_45px_rgba(5,0,18,0.65)] sm:px-7 sm:py-8">
             <header>
               <h1 className="text-2xl font-bold tracking-tight text-white">
-                Welcome Back
+                Create Account
               </h1>
               <p className="mt-1 text-sm text-slate-400">
-                Please enter your details to log in.
+                Join FPLytics to get started with AI-powered FPL analytics.
               </p>
             </header>
 
             <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
+              <div>
+                <label
+                  htmlFor="username"
+                  className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400"
+                >
+                  Username
+                </label>
+                <div className="relative mt-2">
+                  <User
+                    size={16}
+                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
+                  />
+                  <input
+                    id="username"
+                    name="username"
+                    type="text"
+                    placeholder="Your Username"
+                    value={formData.username}
+                    onChange={handleInputChange}
+                    className="w-full rounded-xl border border-[#472a67] bg-[#26143b] py-3 pl-10 pr-4 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/30"
+                  />
+                </div>
+              </div>
+
               <div>
                 <label
                   htmlFor="email"
@@ -128,20 +161,12 @@ function Login() {
               </div>
 
               <div>
-                <div className="flex items-center justify-between">
-                  <label
-                    htmlFor="password"
-                    className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400"
-                  >
-                    Password
-                  </label>
-                  <button
-                    type="button"
-                    className="text-[11px] font-semibold uppercase tracking-[0.12em] text-emerald-300 transition hover:text-emerald-200"
-                  >
-                    Forgot Password?
-                  </button>
-                </div>
+                <label
+                  htmlFor="password"
+                  className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400"
+                >
+                  Password
+                </label>
                 <div className="relative mt-2">
                   <Lock
                     size={16}
@@ -151,10 +176,10 @@ function Login() {
                     id="password"
                     name="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="********"
+                    placeholder="At least 8 characters"
                     value={formData.password}
                     onChange={handleInputChange}
-                    autoComplete="current-password"
+                    autoComplete="new-password"
                     className="w-full rounded-xl border border-[#472a67] bg-[#26143b] py-3 pl-10 pr-4 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/30"
                   />
                   <button
@@ -168,6 +193,47 @@ function Login() {
                     }
                   >
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="confirmPassword"
+                  className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400"
+                >
+                  Confirm Password
+                </label>
+                <div className="relative mt-2">
+                  <Lock
+                    size={16}
+                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
+                  />
+                  <input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Confirm your password"
+                    value={formData.confirmPassword}
+                    onChange={handleInputChange}
+                    autoComplete="new-password"
+                    className="w-full rounded-xl border border-[#472a67] bg-[#26143b] py-3 pl-10 pr-4 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/30"
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setShowConfirmPassword((previousState) => !previousState)
+                    }
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-slate-300"
+                    aria-label={
+                      showConfirmPassword ? "Hide password" : "Show password"
+                    }
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff size={16} />
+                    ) : (
+                      <Eye size={16} />
+                    )}
                   </button>
                 </div>
               </div>
@@ -186,55 +252,24 @@ function Login() {
                 {isSubmitting ? (
                   <span className="inline-flex items-center gap-2">
                     <Loader2 size={16} className="animate-spin" />
-                    Signing In...
+                    Creating Account...
                   </span>
                 ) : (
-                  "Sign In"
+                  "Create Account"
                 )}
               </button>
             </form>
-
-            <div className="mt-6 flex items-center gap-3">
-              <span className="h-px flex-1 bg-[#3c2458]" />
-              <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                Or Continue With
-              </span>
-              <span className="h-px flex-1 bg-[#3c2458]" />
-            </div>
-
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => handleSocialLogin("Google")}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#5a2a36] bg-[#271322] px-3 py-2.5 text-sm font-medium text-slate-100 transition hover:border-[#ea4335]/70"
-              >
-                <span className="grid h-5 w-5 place-items-center rounded-full bg-[#ea4335]/25 text-xs font-bold text-[#ff8b80]">
-                  G
-                </span>
-                Google
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSocialLogin("Facebook")}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#2a4375] bg-[#141f35] px-3 py-2.5 text-sm font-medium text-slate-100 transition hover:border-[#1877f2]/70"
-              >
-                <span className="grid h-5 w-5 place-items-center rounded-full bg-[#1877f2]/25 text-sm font-bold text-[#8cbcff]">
-                  f
-                </span>
-                Facebook
-              </button>
-            </div>
           </section>
 
           <footer className="mt-5 text-center">
             <p className="text-xs text-slate-400">
-              New to the league?{" "}
+              Already have an account?{" "}
               <button
                 type="button"
-                onClick={handleSignUp}
+                onClick={handleBackToLogin}
                 className="font-semibold uppercase tracking-[0.1em] text-emerald-300 hover:text-emerald-200"
               >
-                Create Account
+                Sign In
               </button>
             </p>
             <div className="mt-3 flex items-center justify-center gap-4 text-[10px] uppercase tracking-[0.15em] text-slate-500">
@@ -255,4 +290,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default Register;

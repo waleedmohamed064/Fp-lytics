@@ -8,6 +8,7 @@ import {
   MoreHorizontal,
   Shield,
   Zap,
+  User,
 } from "lucide-react";
 
 const navItems = [
@@ -17,6 +18,7 @@ const navItems = [
   { name: "Stats", path: "/stats", icon: BarChart2 },
   { name: "Alerts", path: "/alerts", icon: Bell },
   { name: "More", path: "/more", icon: MoreHorizontal },
+  { name: "Profile", path: "/profile", icon: User },
 ];
 
 export default function Sidebar() {
