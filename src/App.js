@@ -1,24 +1,26 @@
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Login from "./Login"; // ملف الـ Login اللي انت عملته
+import DashboardLayout from "./DashboardLayout";
+import { Home, Squad, Transfers, Stats, Alerts, More } from "./Pages";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        {/* مسار الـ Login لوحده من غير القائمة الجانبية */}
+        <Route path="/login" element={<Login />} />
+
+        {/* باقي البروجكت ملفوف جوه الـ DashboardLayout */}
+        <Route element={<DashboardLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/squad" element={<Squad />} />
+          <Route path="/transfers" element={<Transfers />} />
+          <Route path="/stats" element={<Stats />} />
+          <Route path="/alerts" element={<Alerts />} />
+          <Route path="/more" element={<More />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
 
