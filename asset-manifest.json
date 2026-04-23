@@ -1,10 +1,10 @@
 {
   "files": {
-    "main.js": "/Fp-lytics/static/js/main.258f140b.js",
+    "main.js": "/Fp-lytics/static/js/main.b170b34d.js",
     "index.html": "/Fp-lytics/index.html",
-    "main.258f140b.js.map": "/Fp-lytics/static/js/main.258f140b.js.map"
+    "main.b170b34d.js.map": "/Fp-lytics/static/js/main.b170b34d.js.map"
   },
   "entrypoints": [
-    "static/js/main.258f140b.js"
+    "static/js/main.b170b34d.js"
   ]
 }
