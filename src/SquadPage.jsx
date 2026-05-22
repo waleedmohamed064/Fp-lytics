@@ -1,457 +1,453 @@
-import { useState, useEffect } from "react";
-import { Loader2, AlertCircle, Save } from "lucide-react";
-import { getPlayers } from "./api";
+import { useEffect, useMemo, useState } from "react";
+import { Loader2, Shirt, UserRound, Lock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+const pitchViews = [
+  {
+    title: "Your Current XI",
+    formation: "3-4-3",
+    projected: 58.2,
+    optimized: false,
+    players: {
+      GK: [
+        {
+          id: 1,
+          name: "AREOLA",
+          opponent: "MUN",
+          proj: 2.1,
+        },
+      ],
+      DEF: [
+        {
+          id: 2,
+          name: "GABRIEL",
+          opponent: "NFO",
+          proj: 5.8,
+        },
+        {
+          id: 3,
+          name: "SALIBA",
+          opponent: "NFO",
+          proj: 5.5,
+        },
+        {
+          id: 4,
+          name: "PORRO",
+          opponent: "AVL",
+          proj: 4.2,
+        },
+      ],
+      MID: [
+        {
+          id: 5,
+          name: "SALAH (C)",
+          opponent: "NFO",
+          proj: 14.4,
+        },
+        {
+          id: 6,
+          name: "SAKA",
+          opponent: "NFO",
+          proj: 7.1,
+        },
+        {
+          id: 7,
+          name: "FODEN",
+          opponent: "WHU",
+          proj: 2.8,
+        },
+        {
+          id: 8,
+          name: "MBEUMO",
+          opponent: "SOU",
+          proj: 5.0,
+        },
+      ],
+      FWD: [
+        {
+          id: 9,
+          name: "HAALAND",
+          opponent: "WHU",
+          proj: 8.2,
+        },
+        {
+          id: 10,
+          name: "WATKINS",
+          opponent: "TOT",
+          proj: 4.8,
+        },
+        {
+          id: 11,
+          name: "SOLANKE",
+          opponent: "MCI",
+          proj: 4.5,
+        },
+      ],
+    },
+    bench: [
+      {
+        id: 12,
+        name: "FABIANSKI",
+        opponent: "MUN",
+        proj: 3.8,
+      },
+      {
+        id: 13,
+        name: "GORDON",
+        opponent: "SOU",
+        proj: 8.1,
+      },
+      {
+        id: 14,
+        name: "BELL",
+        opponent: "LIV",
+        proj: 1.2,
+      },
+      {
+        id: 15,
+        name: "TAYLOR",
+        opponent: "ARS",
+        proj: 0.8,
+      },
+    ],
+  },
+  {
+    title: "AI Optimized XI",
+    formation: "3-5-2",
+    projected: 66.6,
+    optimized: true,
+    locked: true,
+    players: {
+      GK: [
+        {
+          id: 16,
+          name: "AREOLA",
+          opponent: "MUN",
+          proj: 2.7,
+        },
+      ],
+      DEF: [
+        {
+          id: 17,
+          name: "GABRIEL",
+          opponent: "NFO",
+          proj: 6.0,
+        },
+        {
+          id: 18,
+          name: "SALIBA",
+          opponent: "NFO",
+          proj: 5.8,
+        },
+        {
+          id: 19,
+          name: "UDOGIE",
+          opponent: "AVL",
+          proj: 4.9,
+        },
+      ],
+      MID: [
+        {
+          id: 20,
+          name: "SALAH",
+          opponent: "NFO",
+          proj: 10.6,
+        },
+        {
+          id: 21,
+          name: "SAKA",
+          opponent: "NFO",
+          proj: 8.3,
+        },
+        {
+          id: 22,
+          name: "FODEN",
+          opponent: "WHU",
+          proj: 6.2,
+        },
+        {
+          id: 23,
+          name: "MBEUMO",
+          opponent: "SOU",
+          proj: 6.0,
+        },
+        {
+          id: 24,
+          name: "BOWEN",
+          opponent: "MUN",
+          proj: 5.7,
+        },
+      ],
+      FWD: [
+        {
+          id: 25,
+          name: "HAALAND",
+          opponent: "WHU",
+          proj: 9.0,
+        },
+        {
+          id: 26,
+          name: "WATKINS",
+          opponent: "TOT",
+          proj: 5.6,
+        },
+      ],
+    },
+    bench: [
+      {
+        id: 27,
+        name: "FABIANSKI",
+        opponent: "MUN",
+        proj: 3.8,
+      },
+      {
+        id: 28,
+        name: "PALMER",
+        opponent: "ARS",
+        proj: 8.2,
+      },
+      {
+        id: 29,
+        name: "PORRO",
+        opponent: "AVL",
+        proj: 4.2,
+      },
+      {
+        id: 30,
+        name: "BELL",
+        opponent: "LIV",
+        proj: 1.2,
+      },
+    ],
+  },
+];
+
+const captainPick = {
+  name: "Kevin De Bruyne",
+  details: "vs Wolverhampton (H)",
+  projected: "8.2 Pts",
+};
+
+const transferRecommendations = [
+  { name: "Phil Foden", details: "MCI - GBP 8.2m", trend: "+14.2%" },
+  { name: "Ollie Watkins", details: "AVL - GBP 8.9m", trend: "+8.7%" },
+];
+
+const formationRows = {
+  "3-4-3": ["GK", "DEF", "MID", "FWD"],
+  "3-5-2": ["GK", "DEF", "MID", "FWD"],
+};
 
 function SquadPage() {
-  const [squad, setSquad] = useState(null);
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [statusMessage, setStatusMessage] = useState(
+    "Squad comparison loaded. Select any player card for details.",
+  );
 
   useEffect(() => {
-    loadSquadData();
+    const timer = window.setTimeout(() => {
+      setLoading(false);
+    }, 300);
+
+    return () => window.clearTimeout(timer);
   }, []);
 
-  const loadSquadData = () => {
-    setTimeout(() => {
-      const formation = {
-        gw: "24",
-        transfers: "2",
-        changesLeft: "1",
-        healthScore: 92,
-        positions: {
-          GK: [
-            {
-              id: 1,
-              name: "Mendy",
-              team: "Chelsea",
-              price: "5.0m",
-              status: "FIT",
-            },
-          ],
-          DEF: [
-            {
-              id: 2,
-              name: "Alexander-Arnold",
-              team: "Liverpool",
-              price: "8.5m",
-              status: "FIT",
-            },
-            {
-              id: 3,
-              name: "van Dijk",
-              team: "Liverpool",
-              price: "8.4m",
-              status: "FIT",
-            },
-            {
-              id: 4,
-              name: "Walker",
-              team: "Man City",
-              price: "8.0m",
-              status: "FIT",
-            },
-            {
-              id: 5,
-              name: "Akanji",
-              team: "Man City",
-              price: "6.5m",
-              status: "FIT",
-            },
-          ],
-          MID: [
-            {
-              id: 6,
-              name: "Salah",
-              team: "Liverpool",
-              price: "13.2m",
-              status: "CAUTION",
-            },
-            {
-              id: 7,
-              name: "Saka",
-              team: "Arsenal",
-              price: "10.1m",
-              status: "FIT",
-            },
-            {
-              id: 8,
-              name: "Palmer",
-              team: "Chelsea",
-              price: "10.8m",
-              status: "FIT",
-            },
-            {
-              id: 9,
-              name: "Gündoğan",
-              team: "Man City",
-              price: "8.2m",
-              status: "FIT",
-            },
-            {
-              id: 10,
-              name: "Maddison",
-              team: "Tottenham",
-              price: "8.6m",
-              status: "FIT",
-            },
-          ],
-          FWD: [
-            {
-              id: 11,
-              name: "Haaland",
-              team: "Man City",
-              price: "14.5m",
-              status: "FIT",
-            },
-            {
-              id: 12,
-              name: "Isak",
-              team: "Newcastle",
-              price: "11.8m",
-              status: "FIT",
-            },
-            {
-              id: 13,
-              name: "Watkins",
-              team: "Aston Villa",
-              price: "8.9m",
-              status: "FIT",
-            },
-          ],
-        },
-        bench: [
-          {
-            id: 14,
-            name: "Ramsdale",
-            team: "Arsenal",
-            price: "5.2m",
-            position: "GK",
-          },
-          {
-            id: 15,
-            name: "Dalot",
-            team: "Man United",
-            price: "5.8m",
-            position: "DEF",
-          },
-          {
-            id: 16,
-            name: "Mount",
-            team: "Man United",
-            price: "6.5m",
-            position: "MID",
-          },
-          {
-            id: 17,
-            name: "Solanke",
-            team: "Bournemouth",
-            price: "7.8m",
-            position: "FWD",
-          },
-        ],
-      };
-      setSquad(formation);
-      setLoading(false);
-    }, 500);
-  };
+  const selectedSummary = useMemo(() => {
+    if (!selectedPlayer) {
+      return "No player selected";
+    }
+    return `${selectedPlayer.name} · vs ${selectedPlayer.opponent} · ${selectedPlayer.proj.toFixed(1)} pts`;
+  }, [selectedPlayer]);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <Loader2 className="animate-spin text-emerald-300" size={32} />
+      <div className="flex min-h-[70vh] items-center justify-center">
+        <Loader2 className="animate-spin text-emerald-300" size={34} />
       </div>
     );
   }
 
-  const FormationField = () => (
-    <div className="rounded-2xl border-4 border-emerald-400 bg-gradient-to-b from-green-700/40 to-green-800/60 p-6 relative overflow-hidden">
-      <div className="absolute inset-0 opacity-30">
-        <svg className="w-full h-full" viewBox="0 0 100 150">
-          <line
-            x1="50"
-            y1="0"
-            x2="50"
-            y2="150"
-            stroke="rgba(255,255,255,0.1)"
-            strokeWidth="0.5"
-          />
-          <circle
-            cx="50"
-            cy="75"
-            r="15"
-            fill="none"
-            stroke="rgba(255,255,255,0.1)"
-            strokeWidth="0.5"
-          />
-          <rect
-            x="40"
-            y="5"
-            width="20"
-            height="20"
-            fill="none"
-            stroke="rgba(255,255,255,0.1)"
-            strokeWidth="0.5"
-          />
-          <rect
-            x="40"
-            y="125"
-            width="20"
-            height="20"
-            fill="none"
-            stroke="rgba(255,255,255,0.1)"
-            strokeWidth="0.5"
-          />
-        </svg>
-      </div>
-
-      <div className="relative space-y-8">
-        {/* Goalkeeper */}
-        <div className="flex justify-center">
-          <div className="flex gap-2">
-            {squad.positions.GK.map((p) => (
-              <PlayerBadge
-                key={p.id}
-                player={p}
-                onSelect={() => setSelectedPlayer(p)}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Defenders */}
-        <div className="flex justify-center gap-3">
-          {squad.positions.DEF.map((p) => (
-            <PlayerBadge
-              key={p.id}
-              player={p}
-              onSelect={() => setSelectedPlayer(p)}
-            />
-          ))}
-        </div>
-
-        {/* Midfielders */}
-        <div className="flex justify-center gap-2 flex-wrap">
-          {squad.positions.MID.map((p) => (
-            <PlayerBadge
-              key={p.id}
-              player={p}
-              onSelect={() => setSelectedPlayer(p)}
-            />
-          ))}
-        </div>
-
-        {/* Forwards */}
-        <div className="flex justify-center gap-3">
-          {squad.positions.FWD.map((p) => (
-            <PlayerBadge
-              key={p.id}
-              player={p}
-              onSelect={() => setSelectedPlayer(p)}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
-  const PlayerBadge = ({ player, onSelect }) => (
-    <button
-      onClick={onSelect}
-      className="flex flex-col items-center gap-1 p-2 rounded-lg bg-[#1e102f] border-2 border-emerald-400 hover:border-cyan-400 transition cursor-pointer"
-    >
-      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-400/30 to-cyan-400/30 border border-emerald-400 flex items-center justify-center">
-        <div className="text-xs font-bold text-emerald-300">
-          {player.name.split(" ")[0][0]}
-        </div>
-      </div>
-      <p className="text-[10px] font-bold text-white text-center whitespace-nowrap">
-        {player.name.split(" ").pop()}
-      </p>
-      <span
-        className={`text-[8px] font-bold px-1 rounded ${
-          player.status === "CAUTION"
-            ? "bg-yellow-900/50 text-yellow-300"
-            : "bg-emerald-900/50 text-emerald-300"
-        }`}
-      >
-        {player.status}
-      </span>
-    </button>
-  );
-
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-4xl font-bold text-white">
-            FPLytics - Squad Management
+          <h1 className="text-4xl font-bold text-white sm:text-5xl">
+            Squad Comparison
           </h1>
-          <p className="text-slate-400 mt-1">Gameweek {squad.gw}</p>
+          <p className="mt-1 text-sm text-slate-400">
+            GW12 Optimization Analysis
+          </p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-400 text-[#072015] font-bold hover:brightness-110 transition">
-          <Save size={16} />
-          Save Changes
-        </button>
       </div>
 
-      {/* Formation Field */}
-      <FormationField />
+      <div className="grid gap-5 xl:grid-cols-2">
+        {pitchViews.map((view) => (
+          <div key={view.title} className="space-y-4">
+            <div className="flex items-center justify-between px-1">
+              <div>
+                <p className={`text-xl font-bold ${view.optimized ? "text-emerald-300" : "text-white"}`}>
+                  {view.title}
+                </p>
+                <p className="text-xs text-slate-400">{view.formation}</p>
+              </div>
+              <p className="text-sm text-slate-300">
+                Proj: <span className="font-semibold text-emerald-300">{view.projected}</span>
+              </p>
+            </div>
 
-      {/* Squad Stats & Health */}
-      <div className="grid grid-cols-3 gap-4">
-        {/* Squad Health Score */}
-        <div className="rounded-2xl border border-[#3d245b] bg-[#1e102f] p-6">
-          <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wide mb-4">
-            Squad Health Score
-          </h3>
-          <div className="flex items-center justify-center">
-            <div className="relative w-32 h-32">
-              <svg className="w-full h-full" viewBox="0 0 120 120">
-                <circle
-                  cx="60"
-                  cy="60"
-                  r="50"
-                  fill="none"
-                  stroke="#331c4f"
-                  strokeWidth="8"
-                />
-                <circle
-                  cx="60"
-                  cy="60"
-                  r="50"
-                  fill="none"
-                  stroke="url(#gradient)"
-                  strokeWidth="8"
-                  strokeDasharray={`${squad.healthScore * 3.14} 314`}
-                  strokeLinecap="round"
-                  transform="rotate(-90 60 60)"
-                />
-                <defs>
-                  <linearGradient id="gradient" x1="0%" y1="0%" x2="100%">
-                    <stop offset="0%" stopColor="#00e676" />
-                    <stop offset="100%" stopColor="#00bcd4" />
-                  </linearGradient>
-                </defs>
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-emerald-400">
-                    {squad.healthScore}%
+            <section className="overflow-hidden rounded-[24px] border border-[#3d245b] bg-[#1a0f2a]">
+              <div className="relative rounded-[20px] border border-emerald-400/35 bg-[linear-gradient(180deg,#08985f_0%,#0c7f53_58%,#0a6b46_100%)] px-4 py-5 sm:px-5 sm:py-6">
+                <div className="pointer-events-none absolute inset-0 opacity-35">
+                  <div className="absolute inset-x-0 top-1/2 h-px bg-white/30" />
+                  <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-white/30" />
+                  <div className="absolute inset-3 rounded-[20px] border border-white/20" />
+                  <div className="absolute left-1/2 top-4 h-14 w-40 -translate-x-1/2 rounded-b-[24px] border border-white/20 border-t-0" />
+                  <div className="absolute left-1/2 bottom-4 h-14 w-40 -translate-x-1/2 rounded-t-[24px] border border-white/20 border-b-0" />
+                </div>
+
+                <div className={`relative space-y-4 ${view.locked ? "blur-[3px]" : ""}`}>
+                  {formationRows[view.formation].map((line) => (
+                    <div key={line} className="flex items-center justify-around gap-2 sm:gap-3">
+                      {view.players[line].map((player) => (
+                        <PlayerCard
+                          key={player.id}
+                          player={player}
+                          onSelect={(selected) => {
+                            setSelectedPlayer(selected);
+                            setStatusMessage(`Selected ${selected.name} from ${view.title}.`);
+                          }}
+                        />
+                      ))}
+                    </div>
+                  ))}
+                </div>
+
+                {view.locked ? (
+                  <div className="absolute inset-0 grid place-items-center p-4">
+                    <div className="w-full max-w-[230px] rounded-2xl border border-[#4d2f70] bg-[#2a1140]/95 p-4 text-center shadow-[0_20px_60px_rgba(0,0,0,0.5)]">
+                      <div className="mx-auto grid h-9 w-9 place-items-center rounded-full bg-emerald-400/15 text-emerald-300">
+                        <Lock size={16} />
+                      </div>
+                      <p className="mt-3 font-semibold text-white">Unlock AI Predictions</p>
+                      <p className="mt-2 text-xs text-slate-400">
+                        Get access to elite team optimization and projected points.
+                      </p>
+                      <button
+                        onClick={() => {
+                          setStatusMessage("Redirected to Premium plans.");
+                          navigate("/premium");
+                        }}
+                        className="mt-4 w-full rounded-lg bg-emerald-400 px-3 py-2 text-sm font-bold text-[#072015]"
+                      >
+                        Upgrade to Pro
+                      </button>
+                    </div>
                   </div>
-                  <p className="text-xs text-slate-400 mt-1">Excellent</p>
+                ) : null}
+              </div>
+
+              <div className="border-t border-[#321f49] bg-[#190d29] px-4 py-4 sm:px-5">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-400">Bench</p>
+                <div className="mt-3 grid grid-cols-4 gap-2">
+                  {view.bench.map((player) => (
+                    <MiniBenchCard
+                      key={player.id}
+                      player={player}
+                      onSelect={(selected) => {
+                        setSelectedPlayer(selected);
+                        setStatusMessage(`Bench pick selected: ${selected.name}.`);
+                      }}
+                    />
+                  ))}
                 </div>
               </div>
-            </div>
+            </section>
           </div>
-        </div>
-
-        {/* Substitutes */}
-        <div className="rounded-2xl border border-[#3d245b] bg-[#1e102f] p-6 col-span-2">
-          <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wide mb-4">
-            Substitutes & Bench
-          </h3>
-          <div className="grid grid-cols-4 gap-2">
-            {squad.bench.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => setSelectedPlayer(p)}
-                className="p-3 rounded-lg border border-[#4d2f70] bg-[#241239] hover:border-emerald-400/50 transition text-left"
-              >
-                <p className="text-xs font-bold text-white truncate">
-                  {p.name}
-                </p>
-                <p className="text-[10px] text-slate-400">{p.position}</p>
-                <p className="text-[10px] text-emerald-400 mt-1">{p.price}</p>
-              </button>
-            ))}
-          </div>
-        </div>
+        ))}
       </div>
 
-      {/* Transfers & Info */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="rounded-2xl border border-[#3d245b] bg-[#1e102f] p-6">
-          <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wide mb-4">
-            Transfers Info
-          </h3>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center p-3 bg-[#241239] rounded-lg border border-[#4d2f70]">
-              <span className="text-sm text-slate-300">Transfers Made</span>
-              <span className="text-lg font-bold text-emerald-400">
-                {squad.transfers}
-              </span>
+      <section className="rounded-[22px] border border-[#3d245b] bg-[#1a0f2a] p-5 sm:p-6">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-400">
+          AI Captaincy Pick
+        </p>
+        <div className="mt-3 rounded-2xl border border-emerald-400/35 bg-[linear-gradient(120deg,rgba(41,23,64,0.95),rgba(34,58,73,0.4))] p-4 sm:p-5">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="grid h-12 w-12 place-items-center rounded-xl border border-emerald-300/40 bg-[#1a2337] text-emerald-300">
+                <UserRound size={22} />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-emerald-300">{captainPick.name}</p>
+                <p className="text-xs text-slate-400">{captainPick.details}</p>
+              </div>
             </div>
-            <div className="flex justify-between items-center p-3 bg-[#241239] rounded-lg border border-[#4d2f70]">
-              <span className="text-sm text-slate-300">Changes Left</span>
-              <span className="text-lg font-bold text-cyan-400">
-                {squad.changesLeft}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-[#3d245b] bg-[#1e102f] p-6">
-          <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wide mb-4">
-            Transfer Recommendation
-          </h3>
-          <div className="flex items-start gap-3 p-3 bg-emerald-900/20 border border-emerald-700/50 rounded-lg">
-            <span className="text-emerald-400 mt-1">✓</span>
-            <div>
-              <p className="text-sm text-emerald-300 font-semibold">
-                Recommended transfer
-              </p>
-              <p className="text-xs text-emerald-200 mt-1">
-                Replace Salah with Palmer to optimize point prediction
-              </p>
+            <div className="text-right">
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Projected</p>
+              <p className="text-xl font-bold text-emerald-300">{captainPick.projected}</p>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Selected Player Details */}
-      {selectedPlayer && (
-        <div className="rounded-2xl border border-emerald-400/50 bg-[#1e102f] p-6">
-          <div className="flex justify-between items-start">
-            <div>
-              <h3 className="text-xl font-bold text-white">
-                {selectedPlayer.name}
-              </h3>
-              <p className="text-sm text-slate-400 mt-1">
-                {selectedPlayer.team}
-              </p>
-            </div>
+      <section className="rounded-[22px] border border-[#3d245b] bg-[#1a0f2a] p-5 sm:p-6">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-400">
+          Transfer Recommendations
+        </p>
+        <div className="mt-3 space-y-3">
+          {transferRecommendations.map((item) => (
             <button
-              onClick={() => setSelectedPlayer(null)}
-              className="text-slate-400 hover:text-white"
+              key={item.name}
+              onClick={() => setStatusMessage(`Transfer scout opened: ${item.name}.`)}
+              className="flex w-full items-center justify-between rounded-xl border border-[#321f49] bg-[#190d29] px-4 py-3 text-left transition hover:border-emerald-400/35"
             >
-              ✕
+              <div>
+                <p className="font-semibold text-white">{item.name}</p>
+                <p className="text-xs text-slate-400">{item.details}</p>
+              </div>
+              <p className="text-sm font-bold text-emerald-300">{item.trend}</p>
             </button>
-          </div>
-          <div className="grid grid-cols-3 gap-4 mt-4">
-            <div className="p-3 bg-[#241239] rounded-lg border border-[#4d2f70]">
-              <p className="text-xs text-slate-400">Price</p>
-              <p className="text-lg font-bold text-emerald-400 mt-1">
-                {selectedPlayer.price}
-              </p>
-            </div>
-            <div className="p-3 bg-[#241239] rounded-lg border border-[#4d2f70]">
-              <p className="text-xs text-slate-400">Status</p>
-              <p className="text-lg font-bold text-white mt-1">
-                {selectedPlayer.status}
-              </p>
-            </div>
-            <div className="p-3 bg-[#241239] rounded-lg border border-[#4d2f70]">
-              <p className="text-xs text-slate-400">Action</p>
-              <button className="text-sm font-bold text-emerald-400 hover:text-emerald-300 mt-1">
-                → Replace
-              </button>
-            </div>
-          </div>
+          ))}
         </div>
-      )}
+      </section>
+
+      <section className="rounded-[20px] border border-[#3d245b] bg-[#170d27] px-4 py-3 text-sm text-slate-300">
+        <span className="font-semibold text-white">Status:</span> {statusMessage}
+        <span className="ml-3 text-slate-400">{selectedSummary}</span>
+      </section>
     </div>
+  );
+}
+
+function PlayerCard({ player, onSelect }) {
+  return (
+    <button
+      onClick={() => onSelect(player)}
+      className="w-[78px] rounded-lg bg-[#2b0f3f] p-2 text-center shadow-[0_8px_24px_rgba(0,0,0,0.2)] transition hover:brightness-110"
+    >
+      <div className="mx-auto grid h-8 w-8 place-items-center rounded-md bg-[#1a1327] text-slate-200">
+        <Shirt size={16} />
+      </div>
+      <p className="mt-2 truncate text-[9px] font-bold tracking-[0.08em] text-white">{player.name}</p>
+      <p className="mt-1 text-[9px] text-slate-400">VS {player.opponent}</p>
+      <p className="text-[9px] font-semibold text-emerald-300">{player.proj.toFixed(1)}</p>
+    </button>
+  );
+}
+
+function MiniBenchCard({ player, onSelect }) {
+  return (
+    <button
+      onClick={() => onSelect(player)}
+      className="rounded-lg border border-[#322043] bg-[#201231] p-2 text-center transition hover:border-emerald-400/35"
+    >
+      <div className="mx-auto grid h-7 w-7 place-items-center rounded-md bg-[#171025] text-slate-300">
+        <Shirt size={14} />
+      </div>
+      <p className="mt-1 truncate text-[9px] font-semibold text-slate-200">{player.name}</p>
+      <p className="text-[9px] text-emerald-300">{player.proj.toFixed(1)}</p>
+    </button>
   );
 }
 

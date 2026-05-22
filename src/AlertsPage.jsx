@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-  AlertCircle,
   TrendingUp,
   TrendingDown,
   Clock,
@@ -9,6 +8,9 @@ import {
 
 function AlertsPage() {
   const [activeTab, setActiveTab] = useState("all");
+  const [showHighPriorityOnly, setShowHighPriorityOnly] = useState(false);
+  const [dismissedAlertIds, setDismissedAlertIds] = useState([]);
+  const [selectedAlert, setSelectedAlert] = useState(null);
 
   const alerts = [
     {
@@ -53,6 +55,21 @@ function AlertsPage() {
       priority: "CRITICAL",
       badgeColor: "bg-red-900",
       textColor: "text-red-400",
+    },
+    {
+      id: 4,
+      type: "injury_news",
+      player: "Mohamed Salah",
+      team: "Liverpool",
+      price: "Status Update",
+      change: "Rotation Watch",
+      changePercent: "📰",
+      reason:
+        "Training load monitored after minor knock. Expected to be available.",
+      timestamp: "35 minutes ago",
+      priority: "MEDIUM",
+      badgeColor: "bg-cyan-900",
+      textColor: "text-cyan-400",
     },
   ];
 
@@ -102,6 +119,25 @@ function AlertsPage() {
     },
   ];
 
+  const filteredAlerts = alerts.filter((alert) => {
+    if (dismissedAlertIds.includes(alert.id)) {
+      return false;
+    }
+
+    const matchesTab =
+      activeTab === "all" ||
+      (activeTab === "price" && alert.type.includes("price")) ||
+      (activeTab === "news" && alert.type === "injury_news") ||
+      (activeTab === "fixture" && alert.type.includes("fixture"));
+
+    const matchesPriority =
+      !showHighPriorityOnly ||
+      alert.priority === "HIGH" ||
+      alert.priority === "CRITICAL";
+
+    return matchesTab && matchesPriority;
+  });
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -112,9 +148,18 @@ function AlertsPage() {
             Stay ahead with real-time notifications
           </p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[#4d2f70] bg-[#241239] text-emerald-400 hover:border-emerald-400/50 transition">
+        <button
+          onClick={() =>
+            setShowHighPriorityOnly((previousState) => !previousState)
+          }
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition ${
+            showHighPriorityOnly
+              ? "border-emerald-400 bg-emerald-400/10 text-emerald-300"
+              : "border-[#4d2f70] bg-[#241239] text-emerald-400 hover:border-emerald-400/50"
+          }`}
+        >
           <Filter size={16} />
-          Filter Alerts
+          {showHighPriorityOnly ? "High Priority" : "Filter Alerts"}
         </button>
       </div>
 
@@ -143,7 +188,7 @@ function AlertsPage() {
 
       {/* Alert Items */}
       <div className="space-y-3">
-        {alerts.map((alert) => (
+        {filteredAlerts.map((alert) => (
           <div
             key={alert.id}
             className={`rounded-xl border border-[#3d245b] bg-[#1e102f] p-4 hover:border-emerald-400/30 transition overflow-hidden relative`}
@@ -152,7 +197,7 @@ function AlertsPage() {
               className={`absolute top-0 right-0 w-32 h-32 ${alert.badgeColor} opacity-5 blur-2xl rounded-full`}
             ></div>
 
-            <div className="relative flex items-start gap-4">
+            <div className="relative flex flex-col gap-4 md:flex-row md:items-start">
               {/* Icon */}
               <div
                 className={`w-12 h-12 rounded-lg ${alert.badgeColor} bg-opacity-20 flex items-center justify-center flex-shrink-0`}
@@ -186,7 +231,7 @@ function AlertsPage() {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-3 gap-3 my-3">
+                <div className="grid gap-3 sm:grid-cols-3 my-3">
                   <div>
                     <p className="text-xs text-slate-400">Price</p>
                     <p className="text-sm font-semibold text-white mt-1">
@@ -219,21 +264,61 @@ function AlertsPage() {
               </div>
 
               {/* Actions */}
-              <div className="flex flex-col gap-2 ml-4">
-                <button className="px-3 py-1 text-xs font-bold rounded bg-emerald-400/20 text-emerald-300 hover:bg-emerald-400/30 transition whitespace-nowrap">
+              <div className="flex flex-row gap-2 md:ml-4 md:flex-col">
+                <button
+                  onClick={() => setSelectedAlert(alert)}
+                  className="px-3 py-1 text-xs font-bold rounded bg-emerald-400/20 text-emerald-300 hover:bg-emerald-400/30 transition whitespace-nowrap"
+                >
                   View Info
                 </button>
-                <button className="px-3 py-1 text-xs font-bold rounded border border-slate-600 text-slate-300 hover:border-slate-400 transition whitespace-nowrap">
+                <button
+                  onClick={() =>
+                    setDismissedAlertIds((previousIds) => [
+                      ...previousIds,
+                      alert.id,
+                    ])
+                  }
+                  className="px-3 py-1 text-xs font-bold rounded border border-slate-600 text-slate-300 hover:border-slate-400 transition whitespace-nowrap"
+                >
                   Dismiss
                 </button>
               </div>
             </div>
           </div>
         ))}
+        {filteredAlerts.length === 0 ? (
+          <div className="rounded-xl border border-[#3d245b] bg-[#1e102f] p-4 text-sm text-slate-300">
+            No alerts match your current filters.
+          </div>
+        ) : null}
       </div>
 
+      {selectedAlert ? (
+        <div className="rounded-xl border border-emerald-700/50 bg-emerald-900/20 p-4">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-emerald-300">
+                Selected Alert
+              </p>
+              <h3 className="mt-1 text-lg font-bold text-white">
+                {selectedAlert.player}
+              </h3>
+              <p className="mt-1 text-sm text-slate-300">
+                {selectedAlert.reason}
+              </p>
+            </div>
+            <button
+              onClick={() => setSelectedAlert(null)}
+              className="rounded border border-emerald-400/50 px-2 py-1 text-xs font-semibold text-emerald-200 hover:bg-emerald-400/15"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       {/* Your Injures & Load Alerts */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid gap-4 lg:grid-cols-2">
         <div className="rounded-2xl border border-[#3d245b] bg-[#1e102f] p-6">
           <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
             🏥 Your Injuries & News
@@ -296,7 +381,7 @@ function AlertsPage() {
         <h2 className="text-lg font-bold text-white mb-4">
           💹 Price Prediction
         </h2>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {marketTrends.map((trend, idx) => (
             <div
               key={idx}

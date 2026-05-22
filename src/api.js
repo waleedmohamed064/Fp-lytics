@@ -156,7 +156,7 @@ export const removePlayerFromSquad = async (playerId) => {
   });
 };
 
-export default {
+const api = {
   registerUser,
   loginUser,
   logoutUser,
@@ -169,3 +169,5 @@ export default {
   removePlayerFromSquad,
   API_ENDPOINTS,
 };
+
+export default api;

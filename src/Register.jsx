@@ -16,6 +16,7 @@ function Register() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [helperMessage, setHelperMessage] = useState("");
   const navigate = useNavigate();
 
   const handleInputChange = (event) => {
@@ -77,6 +78,31 @@ function Register() {
 
   const handleBackToLogin = () => {
     navigate("/login");
+  };
+
+  const openHelpResource = (type) => {
+    if (type === "privacy") {
+      window.open("https://github.com/privacy", "_blank", "noopener,noreferrer");
+      setHelperMessage("Opened Privacy policy in a new tab.");
+      return;
+    }
+
+    if (type === "terms") {
+      window.open(
+        "https://docs.github.com/site-policy/github-terms/github-terms-of-service",
+        "_blank",
+        "noopener,noreferrer",
+      );
+      setHelperMessage("Opened Terms in a new tab.");
+      return;
+    }
+
+    window.open(
+      "mailto:support@fplytics.app?subject=FPLytics%20Support%20Request",
+      "_blank",
+      "noopener,noreferrer",
+    );
+    setHelperMessage("Opened support email composer.");
   };
 
   return (
@@ -272,14 +298,29 @@ function Register() {
                 Sign In
               </button>
             </p>
-            <div className="mt-3 flex items-center justify-center gap-4 text-[10px] uppercase tracking-[0.15em] text-slate-500">
-              <button type="button" className="transition hover:text-slate-300">
+            {helperMessage ? (
+              <p className="mt-2 text-xs text-emerald-300">{helperMessage}</p>
+            ) : null}
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-4 text-[10px] uppercase tracking-[0.15em] text-slate-500">
+              <button
+                type="button"
+                onClick={() => openHelpResource("privacy")}
+                className="transition hover:text-slate-300"
+              >
                 Privacy
               </button>
-              <button type="button" className="transition hover:text-slate-300">
+              <button
+                type="button"
+                onClick={() => openHelpResource("terms")}
+                className="transition hover:text-slate-300"
+              >
                 Terms
               </button>
-              <button type="button" className="transition hover:text-slate-300">
+              <button
+                type="button"
+                onClick={() => openHelpResource("support")}
+                className="transition hover:text-slate-300"
+              >
                 Support
               </button>
             </div>

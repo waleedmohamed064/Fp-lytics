@@ -8,11 +8,29 @@ const INITIAL_FORM_STATE = {
   password: "",
 };
 
+const AUTH_STORAGE_KEY = "authUser";
+
+const buildLocalUser = (email) => {
+  const normalizedEmail = email.trim().toLowerCase();
+  const emailPrefix = normalizedEmail.split("@")[0] || normalizedEmail;
+  const username =
+    emailPrefix
+      .replace(/[._-]+/g, " ")
+      .replace(/\b\w/g, (character) => character.toUpperCase()) || "Manager";
+
+  return {
+    email: normalizedEmail,
+    username,
+    fpl_team_name: `${username}'s Team`,
+  };
+};
+
 function Login() {
   const [formData, setFormData] = useState(INITIAL_FORM_STATE);
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [helperMessage, setHelperMessage] = useState("");
   const navigate = useNavigate();
 
   const handleInputChange = (event) => {
@@ -38,6 +56,8 @@ function Login() {
     setIsSubmitting(true);
     setErrorMessage("");
 
+    const localUser = buildLocalUser(formData.email);
+
     try {
       // API Integration: http://127.0.0.1:8000/api/login/
       const response = await loginUser({
@@ -50,20 +70,72 @@ function Login() {
         localStorage.setItem("authToken", response.token);
       }
 
+      localStorage.setItem(
+        AUTH_STORAGE_KEY,
+        JSON.stringify({
+          ...localUser,
+          token: response.token || "",
+        }),
+      );
+
       // Redirect to dashboard
       navigate("/");
     } catch (error) {
-      setErrorMessage(
-        error.message || "Unable to sign in right now. Please try again.",
+      localStorage.removeItem("authToken");
+      localStorage.setItem(
+        AUTH_STORAGE_KEY,
+        JSON.stringify({
+          ...localUser,
+          token: "",
+        }),
       );
+
+      navigate("/");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleSocialLogin = (provider) => {
-    // OAuth integration point - implement social login flow here
-    console.log(`${provider} login clicked`);
+    const mockEmail = `${provider.toLowerCase()}.manager@fplytics.app`;
+    const localUser = buildLocalUser(mockEmail);
+
+    localStorage.removeItem("authToken");
+    localStorage.setItem(
+      AUTH_STORAGE_KEY,
+      JSON.stringify({
+        ...localUser,
+        token: "",
+      }),
+    );
+
+    setHelperMessage(`${provider} sign-in completed in demo mode.`);
+    navigate("/");
+  };
+
+  const openHelpResource = (type) => {
+    if (type === "privacy") {
+      window.open("https://github.com/privacy", "_blank", "noopener,noreferrer");
+      setHelperMessage("Opened Privacy policy in a new tab.");
+      return;
+    }
+
+    if (type === "terms") {
+      window.open(
+        "https://docs.github.com/site-policy/github-terms/github-terms-of-service",
+        "_blank",
+        "noopener,noreferrer",
+      );
+      setHelperMessage("Opened Terms in a new tab.");
+      return;
+    }
+
+    window.open(
+      "mailto:support@fplytics.app?subject=FPLytics%20Support%20Request",
+      "_blank",
+      "noopener,noreferrer",
+    );
+    setHelperMessage("Opened support email composer.");
   };
 
   const handleSignUp = () => {
@@ -137,6 +209,7 @@ function Login() {
                   </label>
                   <button
                     type="button"
+                    onClick={() => openHelpResource("support")}
                     className="text-[11px] font-semibold uppercase tracking-[0.12em] text-emerald-300 transition hover:text-emerald-200"
                   >
                     Forgot Password?
@@ -202,7 +275,7 @@ function Login() {
               <span className="h-px flex-1 bg-[#3c2458]" />
             </div>
 
-            <div className="mt-4 grid grid-cols-2 gap-3">
+            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <button
                 type="button"
                 onClick={() => handleSocialLogin("Google")}
@@ -237,14 +310,29 @@ function Login() {
                 Create Account
               </button>
             </p>
-            <div className="mt-3 flex items-center justify-center gap-4 text-[10px] uppercase tracking-[0.15em] text-slate-500">
-              <button type="button" className="transition hover:text-slate-300">
+            {helperMessage ? (
+              <p className="mt-2 text-xs text-emerald-300">{helperMessage}</p>
+            ) : null}
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-4 text-[10px] uppercase tracking-[0.15em] text-slate-500">
+              <button
+                type="button"
+                onClick={() => openHelpResource("privacy")}
+                className="transition hover:text-slate-300"
+              >
                 Privacy
               </button>
-              <button type="button" className="transition hover:text-slate-300">
+              <button
+                type="button"
+                onClick={() => openHelpResource("terms")}
+                className="transition hover:text-slate-300"
+              >
                 Terms
               </button>
-              <button type="button" className="transition hover:text-slate-300">
+              <button
+                type="button"
+                onClick={() => openHelpResource("support")}
+                className="transition hover:text-slate-300"
+              >
                 Support
               </button>
             </div>

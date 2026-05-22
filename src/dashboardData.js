@@ -1,0 +1,98 @@
+export const comparePlayers = [
+  {
+    name: "Mohamed Salah",
+    team: "Liverpool",
+    position: "MID",
+    price: 13.2,
+    projectedPoints: 7.8,
+    form: 0.78,
+    assists: 6,
+    goals: 14,
+    csChance: 42,
+    fixture: "Brighton (H)",
+  },
+  {
+    name: "Erling Haaland",
+    team: "Manchester City",
+    position: "FWD",
+    price: 14.5,
+    projectedPoints: 8.4,
+    form: 0.92,
+    assists: 3,
+    goals: 18,
+    csChance: 38,
+    fixture: "Chelsea (A)",
+  },
+  {
+    name: "Cole Palmer",
+    team: "Chelsea",
+    position: "MID",
+    price: 10.8,
+    projectedPoints: 6.9,
+    form: 0.84,
+    assists: 9,
+    goals: 11,
+    csChance: 35,
+    fixture: "Arsenal (H)",
+  },
+];
+
+export const membershipPlans = [
+  {
+    id: "standard",
+    name: "Standard",
+    priceMonthly: 4.99,
+    priceYearly: 39.99,
+    badge: "Starter",
+    features: [
+      "AI transfer suggestions",
+      "Player comparison tools",
+      "Daily fixture insights",
+    ],
+  },
+  {
+    id: "premium",
+    name: "Premium",
+    priceMonthly: 8.99,
+    priceYearly: 69.99,
+    badge: "Most Popular",
+    features: [
+      "Unlimited AI projections",
+      "Live alerts and premium scouts",
+      "Priority new page access",
+    ],
+  },
+];
+
+export const adminUsers = [
+  {
+    id: 1,
+    name: "James Doe",
+    email: "james.doe@fplytics.com",
+    role: "Super Admin",
+    status: "Active",
+    uid: "#A1029X",
+    lastLogin: "2023-10-24 14:32:01 UTC",
+    valuation: "10.1",
+  },
+  {
+    id: 2,
+    name: "Sarah Mitchell",
+    email: "s.mitchell@analyticspro.io",
+    role: "Pro",
+    status: "Active",
+    uid: "#P1044C",
+    lastLogin: "2023-10-24 09:15:44 UTC",
+    valuation: "8.7",
+  },
+  {
+    id: 3,
+    name: "Alex Wright",
+    email: "alexw99@gmail.com",
+    role: "Free",
+    status: "Suspended",
+    uid: "#F7713Y",
+    lastLogin: "2023-10-10 11:22:00 UTC",
+    valuation: "5.2",
+  },
+];

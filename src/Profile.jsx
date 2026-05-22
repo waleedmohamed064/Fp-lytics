@@ -15,6 +15,47 @@ import {
   deleteAccount,
 } from "./api";
 
+const AUTH_STORAGE_KEY = "authUser";
+
+const readStoredAuthUser = () => {
+  try {
+    const storedValue = localStorage.getItem(AUTH_STORAGE_KEY);
+    return storedValue ? JSON.parse(storedValue) : null;
+  } catch {
+    return null;
+  }
+};
+
+const saveStoredAuthUser = (profileData) => {
+  localStorage.setItem(
+    AUTH_STORAGE_KEY,
+    JSON.stringify({
+      username: profileData?.username || "Manager",
+      email: profileData?.email || "",
+      fpl_team_name: profileData?.fpl_team_name || "Manager's Team",
+      rank: profileData?.rank ?? null,
+    }),
+  );
+};
+
+const buildLocalProfile = (storedUser) => {
+  const email = storedUser?.email || "";
+  const emailPrefix = email.split("@")[0] || "manager";
+  const username =
+    storedUser?.username ||
+    emailPrefix
+      .replace(/[._-]+/g, " ")
+      .replace(/\b\w/g, (character) => character.toUpperCase());
+
+  return {
+    username: username || "Manager",
+    email,
+    fpl_team_name:
+      storedUser?.fpl_team_name || `${username || "Manager"}'s Team`,
+    rank: storedUser?.rank ?? null,
+  };
+};
+
 function Profile() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
@@ -31,29 +72,27 @@ function Profile() {
   }, []);
 
   const loadProfile = async () => {
+    const storedUser = readStoredAuthUser();
+
     try {
       setIsLoading(true);
       // API Integration: http://127.0.0.1:8000/fpl/profile
       const data = await getUserProfile();
       setProfile(data);
       setEditData(data);
+      saveStoredAuthUser(data);
       setError(""); // Clear error if successful
     } catch (err) {
       const errorMsg = err.message || "Failed to load profile";
-      setError(errorMsg);
-      
-      // Fallback to mock data for development if API is not available
-      if (errorMsg.includes("Failed to fetch") || errorMsg.includes("fetch")) {
-        const mockProfile = {
-          username: "waleed",
-          email: "waleedmohamednasir@gmail.com",
-          fpl_team_name: "Elite Manager",
-          rank: 1204,
-        };
-        setProfile(mockProfile);
-        setEditData(mockProfile);
-        setError("⚠️ Backend API not running. Using demo data. Start your backend server at http://127.0.0.1:8000");
-      }
+      const localProfile = buildLocalProfile(storedUser);
+      setProfile(localProfile);
+      setEditData(localProfile);
+      saveStoredAuthUser(localProfile);
+      setError(
+        storedUser?.email
+          ? "Backend API not running. Using your local profile session."
+          : errorMsg,
+      );
     } finally {
       setIsLoading(false);
     }
@@ -63,10 +102,12 @@ function Profile() {
     try {
       // API Integration: http://127.0.0.1:8000/api/logout/
       await logoutUser();
-      localStorage.removeItem("authToken");
-      navigate("/login");
     } catch (err) {
-      setError(err.message || "Logout failed");
+      setError(err.message || "Logout API unavailable. Signed out locally.");
+    } finally {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+      navigate("/login");
     }
   };
 
@@ -75,11 +116,13 @@ function Profile() {
       setIsDeleting(true);
       // API Integration: http://127.0.0.1:8000/api/delete-account/
       await deleteAccount();
-      localStorage.removeItem("authToken");
-      navigate("/login");
     } catch (err) {
-      setError(err.message || "Account deletion failed");
+      setError(err.message || "Delete API unavailable. Account cleared locally.");
+    } finally {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem(AUTH_STORAGE_KEY);
       setIsDeleting(false);
+      navigate("/login");
     }
   };
 
@@ -90,11 +133,23 @@ function Profile() {
       // API Integration: http://127.0.0.1:8000/fpl/profile (PUT)
       const updated = await updateUserProfile(editData);
       setProfile(updated);
+      setEditData(updated);
+      saveStoredAuthUser(updated);
       setIsEditing(false);
       setSuccess("Profile updated successfully!");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
-      setError(err.message || "Failed to update profile");
+      const localUpdatedProfile = {
+        ...(profile || buildLocalProfile(readStoredAuthUser())),
+        ...editData,
+      };
+
+      setProfile(localUpdatedProfile);
+      setEditData(localUpdatedProfile);
+      saveStoredAuthUser(localUpdatedProfile);
+      setIsEditing(false);
+      setSuccess("Profile updated locally.");
+      setTimeout(() => setSuccess(""), 3000);
     } finally {
       setIsLoading(false);
     }

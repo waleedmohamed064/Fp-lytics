@@ -1,12 +1,15 @@
 import { useState } from "react";
-import { Users, BarChart3, ArrowLeft, Download } from "lucide-react";
+import { Download } from "lucide-react";
 
 function PlayerAnalyst() {
   const [selectedPlayers, setSelectedPlayers] = useState([
-    "Salah",
-    "Haaland",
-    "Palmer",
+    "M. Salah",
+    "E. Haaland",
   ]);
+  const [sortBy, setSortBy] = useState("form");
+  const [statusMessage, setStatusMessage] = useState(
+    "Select players to compare their metrics.",
+  );
 
   const players = [
     {
@@ -56,6 +59,58 @@ function PlayerAnalyst() {
     { axis: "xPoints", value: 88, color: "#9c27b0" },
     { axis: "Consistency", value: 78, color: "#ff6b6b" },
     { axis: "Fixtures", value: 82, color: "#ffd700" },
+  ];
+
+  const getSortValue = (player) => {
+    if (sortBy === "value") {
+      return player.stats.value;
+    }
+    if (sortBy === "xPoints") {
+      return player.stats.xPoints;
+    }
+    if (sortBy === "fixtures") {
+      return player.stats.fixtureAvg;
+    }
+    return player.stats.form;
+  };
+
+  const sortedPlayers = [...players].sort(
+    (left, right) => getSortValue(right) - getSortValue(left),
+  );
+
+  const selectedPlayerData = players.filter((player) =>
+    selectedPlayers.includes(player.name),
+  );
+
+  const getAverage = (selector) => {
+    if (selectedPlayerData.length === 0) {
+      return 0;
+    }
+
+    const total = selectedPlayerData.reduce(
+      (sum, player) => sum + selector(player),
+      0,
+    );
+    return total / selectedPlayerData.length;
+  };
+
+  const keyStats = [
+    {
+      label: "Form",
+      value: getAverage((player) => player.stats.form).toFixed(2),
+    },
+    {
+      label: "Value",
+      value: getAverage((player) => player.stats.value).toFixed(1),
+    },
+    {
+      label: "xPoints",
+      value: getAverage((player) => player.stats.xPoints).toFixed(1),
+    },
+    {
+      label: "Fixture Avg",
+      value: getAverage((player) => player.stats.fixtureAvg).toFixed(2),
+    },
   ];
 
   // Simple Radar Chart SVG
@@ -149,14 +204,23 @@ function PlayerAnalyst() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-4xl font-bold text-white">Player Analyst</h1>
           <p className="text-slate-400 mt-1">
             Comparing performance metrics for Gameweek 24 Projections
           </p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[#4d2f70] bg-[#241239] text-emerald-400 hover:border-emerald-400/50 transition">
+        <button
+          onClick={() => {
+            const sortOrder = ["form", "value", "xPoints", "fixtures"];
+            const currentIndex = sortOrder.indexOf(sortBy);
+            const nextSortBy = sortOrder[(currentIndex + 1) % sortOrder.length];
+            setSortBy(nextSortBy);
+            setStatusMessage(`Sorted players by ${nextSortBy}.`);
+          }}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[#4d2f70] bg-[#241239] text-emerald-400 hover:border-emerald-400/50 transition"
+        >
           <Download size={16} />
           Sort Data
         </button>
@@ -167,11 +231,22 @@ function PlayerAnalyst() {
         <h2 className="text-sm font-bold text-white mb-4 uppercase tracking-wider">
           Compare Players
         </h2>
-        <div className="grid grid-cols-6 gap-3">
-          {players.map((player, idx) => (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          {sortedPlayers.map((player, idx) => (
             <button
               key={idx}
-              onClick={() => setSelectedPlayers([player.name])}
+              onClick={() => {
+                setSelectedPlayers((previousPlayers) => {
+                  const exists = previousPlayers.includes(player.name);
+                  if (exists) {
+                    return previousPlayers.filter(
+                      (name) => name !== player.name,
+                    );
+                  }
+                  return [...previousPlayers, player.name];
+                });
+                setStatusMessage(`${player.name} toggled in comparison.`);
+              }}
               className={`p-3 rounded-lg border text-center transition ${
                 selectedPlayers.includes(player.name)
                   ? "border-emerald-400 bg-emerald-400/10"
@@ -193,13 +268,8 @@ function PlayerAnalyst() {
       </div>
 
       {/* Key Stats Comparison */}
-      <div className="grid grid-cols-4 gap-4">
-        {[
-          { label: "Form", value: "0.78", trend: "up" },
-          { label: "Value", value: "254.2", trend: "up" },
-          { label: "xPoints", value: "18", trend: "up" },
-          { label: "Fixture Avg", value: "0.92", trend: "down" },
-        ].map((stat, idx) => (
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {keyStats.map((stat, idx) => (
           <div
             key={idx}
             className="rounded-lg border border-[#4d2f70] bg-[#241239] p-4 text-center"
@@ -213,7 +283,7 @@ function PlayerAnalyst() {
       </div>
 
       {/* Radar Chart Section */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid gap-4 xl:grid-cols-3">
         {/* Left: Radar */}
         <div className="col-span-1 rounded-2xl border border-[#3d245b] bg-[#1e102f] p-6">
           <h3 className="text-sm font-bold text-white mb-4 uppercase">
@@ -242,7 +312,7 @@ function PlayerAnalyst() {
           <h3 className="text-sm font-bold text-white mb-4 uppercase">
             Performance Metrics
           </h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid gap-4 sm:grid-cols-2">
             {[
               { metric: "Form", value: "8.4", color: "emerald" },
               { metric: "Value", value: "8.2", color: "cyan" },
@@ -271,6 +341,11 @@ function PlayerAnalyst() {
             ))}
           </div>
         </div>
+      </div>
+
+      <div className="rounded-xl border border-[#3d245b] bg-[#1e102f] p-3 text-sm text-slate-300">
+        <span className="font-semibold text-white">Status:</span>{" "}
+        {statusMessage}
       </div>
 
       {/* Detailed Stats Table */}

@@ -1,157 +1,168 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ArrowRightLeft } from "lucide-react";
 
+const HOLD_DURATION_MS = 450;
+
+const INITIAL_SQUAD_PLAYERS = [
+  {
+    id: 1,
+    name: "Mendy",
+    team: "Chelsea",
+    pos: "GK",
+    price: 5.0,
+    points: 65,
+  },
+  {
+    id: 2,
+    name: "Alexander-Arnold",
+    team: "Liverpool",
+    pos: "DEF",
+    price: 8.5,
+    points: 82,
+  },
+  {
+    id: 3,
+    name: "Van Dijk",
+    team: "Liverpool",
+    pos: "DEF",
+    price: 8.4,
+    points: 78,
+  },
+  {
+    id: 4,
+    name: "Walker",
+    team: "Man City",
+    pos: "DEF",
+    price: 8.0,
+    points: 71,
+  },
+  {
+    id: 5,
+    name: "Akanji",
+    team: "Man City",
+    pos: "DEF",
+    price: 6.5,
+    points: 58,
+  },
+  {
+    id: 6,
+    name: "Salah",
+    team: "Liverpool",
+    pos: "MID",
+    price: 13.2,
+    points: 210,
+  },
+  {
+    id: 7,
+    name: "Saka",
+    team: "Arsenal",
+    pos: "MID",
+    price: 10.1,
+    points: 156,
+  },
+  {
+    id: 8,
+    name: "Palmer",
+    team: "Chelsea",
+    pos: "MID",
+    price: 10.8,
+    points: 189,
+  },
+  {
+    id: 9,
+    name: "Gündoğan",
+    team: "Man City",
+    pos: "MID",
+    price: 8.2,
+    points: 124,
+  },
+  {
+    id: 10,
+    name: "Haaland",
+    team: "Man City",
+    pos: "FWD",
+    price: 14.5,
+    points: 224,
+  },
+  {
+    id: 11,
+    name: "Isak",
+    team: "Newcastle",
+    pos: "FWD",
+    price: 11.8,
+    points: 167,
+  },
+];
+
+const INITIAL_AVAILABLE_PLAYERS = [
+  {
+    id: 101,
+    name: "Mount",
+    team: "Man United",
+    pos: "MID",
+    price: 6.5,
+    points: 98,
+    trend: "up",
+  },
+  {
+    id: 102,
+    name: "Maddison",
+    team: "Tottenham",
+    pos: "MID",
+    price: 8.6,
+    points: 145,
+    trend: "up",
+  },
+  {
+    id: 103,
+    name: "Dalot",
+    team: "Man United",
+    pos: "DEF",
+    price: 5.8,
+    points: 67,
+    trend: "up",
+  },
+  {
+    id: 104,
+    name: "Watkins",
+    team: "Aston Villa",
+    pos: "FWD",
+    price: 8.9,
+    points: 134,
+    trend: "up",
+  },
+  {
+    id: 105,
+    name: "Solanke",
+    team: "Bournemouth",
+    pos: "FWD",
+    price: 7.8,
+    points: 98,
+    trend: "down",
+  },
+  {
+    id: 106,
+    name: "Vardy",
+    team: "Leicester",
+    pos: "FWD",
+    price: 8.1,
+    points: 87,
+    trend: "down",
+  },
+];
+
 function TransfersPage() {
+  const holdTimeoutRef = useRef(null);
   const [selectedOut, setSelectedOut] = useState(null);
   const [selectedIn, setSelectedIn] = useState(null);
-
-  const squadPlayers = [
-    {
-      id: 1,
-      name: "Mendy",
-      team: "Chelsea",
-      pos: "GK",
-      price: 5.0,
-      points: 65,
-    },
-    {
-      id: 2,
-      name: "Alexander-Arnold",
-      team: "Liverpool",
-      pos: "DEF",
-      price: 8.5,
-      points: 82,
-    },
-    {
-      id: 3,
-      name: "Van Dijk",
-      team: "Liverpool",
-      pos: "DEF",
-      price: 8.4,
-      points: 78,
-    },
-    {
-      id: 4,
-      name: "Walker",
-      team: "Man City",
-      pos: "DEF",
-      price: 8.0,
-      points: 71,
-    },
-    {
-      id: 5,
-      name: "Akanji",
-      team: "Man City",
-      pos: "DEF",
-      price: 6.5,
-      points: 58,
-    },
-    {
-      id: 6,
-      name: "Salah",
-      team: "Liverpool",
-      pos: "MID",
-      price: 13.2,
-      points: 210,
-    },
-    {
-      id: 7,
-      name: "Saka",
-      team: "Arsenal",
-      pos: "MID",
-      price: 10.1,
-      points: 156,
-    },
-    {
-      id: 8,
-      name: "Palmer",
-      team: "Chelsea",
-      pos: "MID",
-      price: 10.8,
-      points: 189,
-    },
-    {
-      id: 9,
-      name: "Gündoğan",
-      team: "Man City",
-      pos: "MID",
-      price: 8.2,
-      points: 124,
-    },
-    {
-      id: 10,
-      name: "Haaland",
-      team: "Man City",
-      pos: "FWD",
-      price: 14.5,
-      points: 224,
-    },
-    {
-      id: 11,
-      name: "Isak",
-      team: "Newcastle",
-      pos: "FWD",
-      price: 11.8,
-      points: 167,
-    },
-  ];
-
-  const availablePlayers = [
-    {
-      id: 101,
-      name: "Mount",
-      team: "Man United",
-      pos: "MID",
-      price: 6.5,
-      points: 98,
-      trend: "up",
-    },
-    {
-      id: 102,
-      name: "Maddison",
-      team: "Tottenham",
-      pos: "MID",
-      price: 8.6,
-      points: 145,
-      trend: "up",
-    },
-    {
-      id: 103,
-      name: "Dalot",
-      team: "Man United",
-      pos: "DEF",
-      price: 5.8,
-      points: 67,
-      trend: "up",
-    },
-    {
-      id: 104,
-      name: "Watkins",
-      team: "Aston Villa",
-      pos: "FWD",
-      price: 8.9,
-      points: 134,
-      trend: "up",
-    },
-    {
-      id: 105,
-      name: "Solanke",
-      team: "Bournemouth",
-      pos: "FWD",
-      price: 7.8,
-      points: 98,
-      trend: "down",
-    },
-    {
-      id: 106,
-      name: "Vardy",
-      team: "Leicester",
-      pos: "FWD",
-      price: 8.1,
-      points: 87,
-      trend: "down",
-    },
-  ];
+  const [squadPlayers, setSquadPlayers] = useState(INITIAL_SQUAD_PLAYERS);
+  const [availablePlayers, setAvailablePlayers] = useState(
+    INITIAL_AVAILABLE_PLAYERS,
+  );
+  const [freeTransfers, setFreeTransfers] = useState(2);
+  const [statusMessage, setStatusMessage] = useState(
+    "Select a player out and in to confirm transfer.",
+  );
 
   const highlights = [
     {
@@ -168,7 +179,7 @@ function TransfersPage() {
     },
   ];
 
-  const transferHistory = [
+  const [transferHistory, setTransferHistory] = useState([
     {
       gw: "GW23",
       out: "Foden",
@@ -190,11 +201,103 @@ function TransfersPage() {
       result: "-3 pts",
       color: "red",
     },
-  ];
+  ]);
 
-  const PlayerSelect = ({ player, isOut, onSelect }) => (
+  const executeTransfer = (playerOut, playerIn, interactionType = "click") => {
+    if (!playerOut || !playerIn) {
+      setStatusMessage("Choose both outgoing and incoming players first.");
+      return false;
+    }
+
+    if (playerOut.pos !== playerIn.pos) {
+      setStatusMessage("Transfer blocked: positions must match.");
+      return false;
+    }
+
+    if (freeTransfers <= 0) {
+      setStatusMessage("No free transfers remaining.");
+      return false;
+    }
+
+    const pointDiff = (playerIn.points - playerOut.points).toFixed(1);
+
+    setSquadPlayers((previousSquad) =>
+      previousSquad.map((player) =>
+        player.id === playerOut.id ? { ...playerIn, id: playerOut.id } : player,
+      ),
+    );
+
+    setAvailablePlayers((previousAvailable) =>
+      previousAvailable.map((player) =>
+        player.id === playerIn.id
+          ? {
+              ...playerOut,
+              id: playerIn.id,
+              trend: playerOut.points >= playerIn.points ? "down" : "up",
+            }
+          : player,
+      ),
+    );
+
+    setTransferHistory((previousHistory) => [
+      {
+        gw: `GW${24 + previousHistory.length}`,
+        out: playerOut.name,
+        in: playerIn.name,
+        result: `${Number.parseFloat(pointDiff) >= 0 ? "+" : ""}${pointDiff} pts`,
+        color: Number.parseFloat(pointDiff) >= 0 ? "green" : "red",
+      },
+      ...previousHistory,
+    ]);
+
+    setFreeTransfers((previousValue) => Math.max(previousValue - 1, 0));
+    setStatusMessage(
+      `Transfer confirmed (${interactionType}): ${playerOut.name} → ${playerIn.name}.`,
+    );
+    setSelectedOut(null);
+    setSelectedIn(null);
+    return true;
+  };
+
+  const handleConfirmTransfer = () => {
+    executeTransfer(selectedOut, selectedIn, "button");
+  };
+
+  const clearHoldTimer = () => {
+    if (holdTimeoutRef.current) {
+      window.clearTimeout(holdTimeoutRef.current);
+      holdTimeoutRef.current = null;
+    }
+  };
+
+  const startHoldTransfer = (playerIn) => {
+    clearHoldTimer();
+    holdTimeoutRef.current = window.setTimeout(() => {
+      if (!selectedOut) {
+        setStatusMessage("Select a player from your squad, then hold an incoming player.");
+        return;
+      }
+      executeTransfer(selectedOut, playerIn, "hold");
+    }, HOLD_DURATION_MS);
+  };
+
+  const handleIncomingPlayerClick = (player) => {
+    setSelectedIn(player);
+    if (!selectedOut) {
+      setStatusMessage(`Selected ${player.name}. Pick a player to transfer out.`);
+      return;
+    }
+    executeTransfer(selectedOut, player, "click");
+  };
+
+  const PlayerSelect = ({ player, isOut, onSelect, onHoldStart, onHoldEnd }) => (
     <button
       onClick={() => onSelect(player)}
+      onMouseDown={() => onHoldStart?.(player)}
+      onMouseUp={onHoldEnd}
+      onMouseLeave={onHoldEnd}
+      onTouchStart={() => onHoldStart?.(player)}
+      onTouchEnd={onHoldEnd}
       className={`w-full p-3 rounded-lg border text-left transition ${
         isOut && selectedOut?.id === player.id
           ? "border-emerald-400 bg-emerald-400/10"
@@ -216,6 +319,11 @@ function TransfersPage() {
           {player.points} pts
         </span>
       </div>
+      {!isOut && selectedOut && (
+        <p className="mt-2 text-[11px] text-emerald-300/80">
+          Click or hold to transfer in
+        </p>
+      )}
     </button>
   );
 
@@ -238,11 +346,16 @@ function TransfersPage() {
       {/* Header */}
       <div>
         <h1 className="text-4xl font-bold text-white">Transfers Hub</h1>
-        <p className="text-slate-400 mt-1">Manage your transfers wisely</p>
+        <p className="text-slate-400 mt-1">
+          Manage your transfers wisely · Free transfers: {freeTransfers}
+        </p>
+        <p className="text-xs text-cyan-300/90 mt-2">
+          Tip: pick a squad player, then click or hold an available player to make a real transfer.
+        </p>
       </div>
 
       {/* Top Highlights */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid gap-4 lg:grid-cols-2">
         {highlights.map((h, idx) => (
           <div
             key={idx}
@@ -270,9 +383,9 @@ function TransfersPage() {
           <ArrowRightLeft size={20} /> Make a Transfer
         </h2>
 
-        <div className="grid grid-cols-5 gap-4">
+        <div className="grid gap-4 lg:grid-cols-5">
           {/* Players to Remove */}
-          <div className="col-span-2">
+          <div className="lg:col-span-2">
             <h3 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
               <span className="text-rose-400">📤</span> From Your Squad
             </h3>
@@ -282,14 +395,17 @@ function TransfersPage() {
                   key={p.id}
                   player={p}
                   isOut
-                  onSelect={setSelectedOut}
+                  onSelect={(player) => {
+                    setSelectedOut(player);
+                    setStatusMessage(`Selected ${player.name} to transfer out.`);
+                  }}
                 />
               ))}
             </div>
           </div>
 
           {/* Transfer Info */}
-          <div className="flex flex-col items-center justify-center">
+          <div className="flex flex-col items-center justify-center lg:col-span-1">
             <div className="flex items-center justify-center w-14 h-14 rounded-full border-2 border-emerald-400 bg-emerald-400/10 mb-4">
               <ArrowRightLeft className="text-emerald-400" size={20} />
             </div>
@@ -315,7 +431,10 @@ function TransfersPage() {
                     {calculatePointDiff()} pts
                   </p>
                 </div>
-                <button className="w-full px-4 py-2 rounded-lg bg-emerald-400 text-[#072015] font-bold hover:brightness-110 transition">
+                <button
+                  onClick={handleConfirmTransfer}
+                  className="w-full px-4 py-2 rounded-lg bg-emerald-400 text-[#072015] font-bold hover:brightness-110 transition"
+                >
                   Confirm Transfer
                 </button>
               </div>
@@ -323,7 +442,7 @@ function TransfersPage() {
           </div>
 
           {/* Players to Add */}
-          <div className="col-span-2">
+          <div className="lg:col-span-2">
             <h3 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
               <span className="text-emerald-400">📥</span> Available Players
             </h3>
@@ -333,7 +452,9 @@ function TransfersPage() {
                   key={p.id}
                   player={p}
                   isOut={false}
-                  onSelect={setSelectedIn}
+                  onSelect={handleIncomingPlayerClick}
+                  onHoldStart={startHoldTransfer}
+                  onHoldEnd={clearHoldTimer}
                 />
               ))}
             </div>
@@ -342,7 +463,7 @@ function TransfersPage() {
       </div>
 
       {/* Transfer History & Analysis */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid gap-4 lg:grid-cols-2">
         <div className="rounded-2xl border border-[#3d245b] bg-[#1e102f] p-6">
           <h2 className="text-lg font-bold text-white mb-4">
             📊 Transfer History
@@ -402,6 +523,11 @@ function TransfersPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="rounded-xl border border-[#3d245b] bg-[#1e102f] p-3 text-sm text-slate-300">
+        <span className="font-semibold text-white">Status:</span>{" "}
+        {statusMessage}
       </div>
     </div>
   );

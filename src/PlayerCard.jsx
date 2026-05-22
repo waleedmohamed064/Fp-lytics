@@ -12,33 +12,34 @@ function PlayerCard({ player }) {
     expectedPoints,
     totalPoints,
     nextFixture,
-    imageUrl
+    imageUrl,
   } = player;
 
   const stats = [
     {
       label: "Price",
       // Real API data injection: player.price
-      value: typeof price === "number" ? `GBP ${price.toFixed(1)}m` : "-"
+      value: typeof price === "number" ? `GBP ${price.toFixed(1)}m` : "-",
     },
     {
       label: "xPts",
       // Real API data injection: player.expectedPoints
-      value: typeof expectedPoints === "number" ? expectedPoints.toFixed(2) : "-"
+      value:
+        typeof expectedPoints === "number" ? expectedPoints.toFixed(2) : "-",
     },
     {
       label: "Total",
       // Real API data injection: player.totalPoints
-      value: typeof totalPoints === "number" ? totalPoints : "-"
-    }
+      value: typeof totalPoints === "number" ? totalPoints : "-",
+    },
   ];
 
   return (
     <article className="relative overflow-hidden rounded-2xl border border-[#3b2259] bg-[#1e102f] p-4 text-slate-100 shadow-[0_14px_35px_rgba(5,0,18,0.6)]">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.16),transparent_48%)]" />
 
-      <div className="relative flex items-start gap-4">
-        <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-[#4d2f70] bg-[#2a1543]">
+      <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start">
+        <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-[#4d2f70] bg-[#2a1543] self-start">
           {/* Real API data injection: player.imageUrl */}
           <img
             src={imageUrl || "https://via.placeholder.com/120x120?text=Player"}
@@ -50,7 +51,9 @@ function PlayerCard({ player }) {
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             {/* Real API data injection: player.name */}
-            <h3 className="truncate text-lg font-bold tracking-wide text-white">{name}</h3>
+            <h3 className="truncate text-lg font-bold tracking-wide text-white">
+              {name}
+            </h3>
             {/* Real API data injection: player.position */}
             <span className="rounded-full border border-emerald-300/50 bg-emerald-400/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-emerald-300">
               {position}
@@ -71,11 +74,18 @@ function PlayerCard({ player }) {
         <div className="h-1 w-2/3 rounded-full bg-emerald-400 shadow-[0_0_14px_rgba(52,211,153,0.9)]" />
       </div>
 
-      <div className="relative mt-4 grid grid-cols-3 gap-2">
+      <div className="relative mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
         {stats.map((stat) => (
-          <div key={stat.label} className="rounded-lg border border-[#40255f] bg-[#241239] px-3 py-2">
-            <p className="text-[10px] uppercase tracking-[0.14em] text-slate-400">{stat.label}</p>
-            <p className="mt-1 text-base font-semibold text-emerald-300">{stat.value}</p>
+          <div
+            key={stat.label}
+            className="rounded-lg border border-[#40255f] bg-[#241239] px-3 py-2"
+          >
+            <p className="text-[10px] uppercase tracking-[0.14em] text-slate-400">
+              {stat.label}
+            </p>
+            <p className="mt-1 text-base font-semibold text-emerald-300">
+              {stat.value}
+            </p>
           </div>
         ))}
       </div>

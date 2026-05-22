@@ -1,17 +1,21 @@
 import { useState, useEffect } from "react";
-import {
-  TrendingUp,
-  TrendingDown,
-  Loader2,
-} from "lucide-react";
+import { TrendingUp, TrendingDown, Loader2 } from "lucide-react";
 
 function Home() {
   const [stats, setStats] = useState(null);
   const [topPlayers, setTopPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCaptainId, setSelectedCaptainId] = useState(null);
+  const [insightMessage, setInsightMessage] = useState(
+    "Captaincy insights are live.",
+  );
 
   useEffect(() => {
-    loadDashboardData();
+    const timerId = window.setTimeout(() => {
+      loadDashboardData();
+    }, 0);
+
+    return () => window.clearTimeout(timerId);
   }, []);
 
   const loadDashboardData = () => {
@@ -55,6 +59,8 @@ function Home() {
         },
       ]);
 
+      setSelectedCaptainId(1);
+
       setLoading(false);
     }, 500);
   };
@@ -83,7 +89,7 @@ function Home() {
       </div>
 
       {/* Key Stats Grid */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {/* Team Health */}
         <div className="rounded-2xl border border-[#3d245b] bg-[#1e102f] p-6 relative overflow-hidden">
           <div className="pointer-events-none absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-2xl rounded-full"></div>
@@ -144,7 +150,7 @@ function Home() {
       </div>
 
       {/* AI Captaincy Battle & Scout Notes */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid gap-4 xl:grid-cols-3">
         {/* AI Captaincy Battle */}
         <div className="col-span-2 rounded-2xl border border-[#3d245b] bg-[#1e102f] p-6">
           <div className="flex justify-between items-center mb-4">
@@ -152,18 +158,38 @@ function Home() {
               <span className="inline-block">⚡</span> AI Captaincy Battle
             </h2>
             <button
-              onClick={() => {}}
+              onClick={() => {
+                const selectedPlayer =
+                  topPlayers.find(
+                    (player) => player.id === selectedCaptainId,
+                  ) || topPlayers[0];
+                if (selectedPlayer) {
+                  setInsightMessage(
+                    `${selectedPlayer.name} is leading captaincy with ${selectedPlayer.prediction}.`,
+                  );
+                }
+              }}
               className="text-emerald-400 text-sm hover:text-emerald-300 transition cursor-pointer font-medium"
             >
               View Analysis →
             </button>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid gap-4 sm:grid-cols-2">
             {topPlayers.map((player) => (
               <div
                 key={player.id}
-                className="rounded-xl border border-[#4d2f70] bg-[#250f3a] p-4 hover:border-emerald-400/50 transition overflow-hidden relative"
+                onClick={() => {
+                  setSelectedCaptainId(player.id);
+                  setInsightMessage(
+                    `${player.name} selected. Predicted return ${player.prediction}.`,
+                  );
+                }}
+                className={`cursor-pointer rounded-xl border bg-[#250f3a] p-4 transition overflow-hidden relative ${
+                  selectedCaptainId === player.id
+                    ? "border-emerald-400/80"
+                    : "border-[#4d2f70] hover:border-emerald-400/50"
+                }`}
               >
                 <div
                   className={`absolute inset-0 ${player.badgeColor} opacity-20 blur-2xl`}
@@ -223,7 +249,7 @@ function Home() {
       </div>
 
       {/* Scout Notes & Price Watch */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid gap-4 lg:grid-cols-2">
         <div className="rounded-2xl border border-[#3d245b] bg-[#1e102f] p-6">
           <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
             📋 Scout Notes & News
@@ -276,6 +302,11 @@ function Home() {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="rounded-xl border border-[#3d245b] bg-[#1e102f] p-3 text-sm text-slate-300">
+        <span className="font-semibold text-white">Live insight:</span>{" "}
+        {insightMessage}
       </div>
     </div>
   );
