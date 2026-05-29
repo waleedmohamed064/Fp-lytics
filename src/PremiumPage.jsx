@@ -1,15 +1,31 @@
 import { useMemo, useState } from "react";
-import { membershipPlans } from "./dashboardData";
 import { useNavigate } from "react-router-dom";
+import { Check } from "lucide-react";
+
+const proPlanFeatures = [
+  "AI-Powered Team Optimization",
+  "Advanced Player Analytics",
+  "Fixture Difficulty Rankings",
+  "Transfer Recommendations",
+  "Performance Predictions",
+  "Historical Data Analysis",
+  "Injury Risk Assessment",
+  "Price Change Forecasts",
+];
 
 function PremiumPage() {
   const [billingCycle, setBillingCycle] = useState("yearly");
   const navigate = useNavigate();
 
-  const selectedPriceLabel = useMemo(
-    () => (billingCycle === "yearly" ? "year" : "month"),
-    [billingCycle],
+  const pricing = useMemo(
+    () => ({
+      monthly: { price: 4.99, period: "month" },
+      yearly: { price: 29.99, period: "season" },
+    }),
+    [],
   );
+
+  const currentPricing = pricing[billingCycle];
 
   return (
     <div className="space-y-6">
@@ -22,7 +38,7 @@ function PremiumPage() {
       <div className="flex flex-wrap gap-2 rounded-2xl border border-[#3d245b] bg-[#1e102f] p-2 w-fit">
         {[
           { key: "monthly", label: "Monthly" },
-          { key: "yearly", label: "Yearly" },
+          { key: "yearly", label: "Yearly (Full Season)" },
         ].map((option) => (
           <button
             key={option.key}
@@ -39,47 +55,51 @@ function PremiumPage() {
         ))}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        {membershipPlans.map((plan) => (
-          <div
-            key={plan.id}
-            className={`rounded-3xl border p-6 ${plan.id === "premium" ? "border-emerald-400/60 bg-[#251036]" : "border-[#3d245b] bg-[#1e102f]"}`}
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-xs uppercase tracking-[0.25em] text-slate-400">{plan.badge}</p>
-                <h2 className="mt-2 text-2xl font-bold text-white">{plan.name}</h2>
-              </div>
-              {plan.id === "premium" ? (
-                <span className="rounded-full bg-emerald-400/20 px-3 py-1 text-xs font-semibold text-emerald-300">Popular</span>
-              ) : null}
+      <div className="flex items-center justify-center">
+        <div className="rounded-3xl border border-emerald-400/60 bg-[#251036] p-8 sm:p-10 w-full max-w-2xl">
+          <div className="flex items-start justify-between gap-3 mb-6">
+            <div>
+              <p className="text-xs uppercase tracking-[0.25em] text-slate-400 font-semibold">Elite Membership</p>
+              <h2 className="mt-3 text-3xl font-bold text-white">Pro</h2>
             </div>
-
-            <div className="mt-5">
-              <p className="text-4xl font-bold text-emerald-300">
-                ${billingCycle === "yearly" ? plan.priceYearly : plan.priceMonthly}
-                <span className="text-base font-medium text-slate-400">/{selectedPriceLabel}</span>
-              </p>
-            </div>
-
-            <ul className="mt-5 space-y-3 text-sm text-slate-300">
-              {plan.features.map((feature) => (
-                <li key={feature} className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
-                  {feature}
-                </li>
-              ))}
-            </ul>
-
-            <button
-              type="button"
-              onClick={() => navigate("/checkout", { state: { planId: plan.id, billingCycle } })}
-              className="mt-6 w-full rounded-xl bg-emerald-400 px-4 py-3 font-bold text-[#072015] transition hover:brightness-110"
-            >
-              Go to Checkout
-            </button>
+            <span className="rounded-full bg-emerald-400/20 border border-emerald-400/60 px-4 py-2 text-sm font-semibold text-emerald-300">
+              Most Popular
+            </span>
           </div>
-        ))}
+
+          <div className="mb-8">
+            <p className="text-5xl font-bold text-emerald-300">
+              ${currentPricing.price}
+              <span className="text-lg font-medium text-slate-400">/{currentPricing.period}</span>
+            </p>
+            {billingCycle === "yearly" && (
+              <p className="mt-2 text-sm text-emerald-300/80">
+                Save 80% compared to monthly billing
+              </p>
+            )}
+          </div>
+
+          <ul className="mb-8 space-y-3">
+            {proPlanFeatures.map((feature) => (
+              <li key={feature} className="flex items-center gap-3 text-slate-300">
+                <Check className="h-5 w-5 text-emerald-400 flex-shrink-0" />
+                <span>{feature}</span>
+              </li>
+            ))}
+          </ul>
+
+          <button
+            type="button"
+            onClick={() => navigate("/checkout", { state: { planId: "pro", billingCycle, price: currentPricing.price } })}
+            className="w-full rounded-xl bg-emerald-400 px-6 py-4 font-bold text-[#072015] text-lg transition hover:brightness-110"
+          >
+            Get Started Today
+          </button>
+
+          <p className="mt-4 text-center text-xs text-slate-400">
+            Cancel anytime. No commitment required.
+          </p>
+        </div>
       </div>
     </div>
   );

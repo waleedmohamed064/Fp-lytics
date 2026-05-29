@@ -1,39 +1,49 @@
 import { NavLink, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import {
   X,
   Home,
   Users,
-  ArrowRightLeft,
   BarChart2,
-  Bell,
-  MoreHorizontal,
   Shield,
   User,
   Gauge,
 } from "lucide-react";
 
-const navItems = [
-  { name: "Home", path: "/", icon: Home },
-  { name: "Squad", path: "/squad", icon: Users },
-  { name: "Transfers", path: "/transfers", icon: ArrowRightLeft },
-  { name: "Stats", path: "/stats", icon: BarChart2 },
-  { name: "Alerts", path: "/alerts", icon: Bell },
-  { name: "More", path: "/more", icon: MoreHorizontal },
-  { name: "Compare", path: "/compare", icon: Gauge },
-  { name: "Pro", path: "/premium", icon: Shield },
-  { name: "Checkout", path: "/checkout", icon: ArrowRightLeft },
-  { name: "Admin", path: "/admin", icon: Users },
-  { name: "Profile", path: "/profile", icon: User },
+const ALL_NAV_ITEMS = [
+  { name: "Home", path: "/dashboard", icon: Home },
+  { name: "Squad", path: "/dashboard/squad", icon: Users },
+  { name: "Stats", path: "/dashboard/stats", icon: BarChart2 },
+  { name: "Compare", path: "/dashboard/compare", icon: Gauge },
+  { name: "Pro", path: "/dashboard/premium", icon: Shield },
+  { name: "Checkout", path: "/dashboard/checkout", icon: Gauge },
+  { name: "Admin", path: "/dashboard/admin", icon: Users, adminOnly: true },
+  { name: "Profile", path: "/dashboard/profile", icon: User },
 ];
 
 export default function Sidebar({ mobileOpen = false, onClose }) {
   const navigate = useNavigate();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Check admin status and update when it changes
+  useEffect(() => {
+    try {
+      const authUserJson = localStorage.getItem("authUser");
+      const authUser = authUserJson ? JSON.parse(authUserJson) : null;
+      setIsAdmin(authUser?.is_admin || false);
+    } catch (error) {
+      setIsAdmin(false);
+    }
+  }, []);
+
+  // Filter nav items based on admin status
+  const navItems = ALL_NAV_ITEMS.filter(item => !item.adminOnly || isAdmin);
 
   const handleProfileShortcut = () => {
     if (typeof onClose === "function") {
       onClose();
     }
-    navigate("/profile");
+    navigate("/dashboard/profile");
   };
 
   return (

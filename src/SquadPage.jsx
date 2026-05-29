@@ -1,3 +1,4 @@
+
 import { useEffect, useMemo, useState } from "react";
 import { Loader2, Shirt, UserRound, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -229,14 +230,9 @@ const captainPick = {
 };
 
 const transferRecommendations = [
-  { name: "Phil Foden", details: "MCI - GBP 8.2m", trend: "+14.2%" },
-  { name: "Ollie Watkins", details: "AVL - GBP 8.9m", trend: "+8.7%" },
+  { name: "Phil Foden", details: "MCI - GBP 8.2m", trend: "+14.2%", type: "in" },
+  { name: "Ollie Watkins", details: "AVL - GBP 8.9m", trend: "+8.7%", type: "out" },
 ];
-
-const formationRows = {
-  "3-4-3": ["GK", "DEF", "MID", "FWD"],
-  "3-5-2": ["GK", "DEF", "MID", "FWD"],
-};
 
 function SquadPage() {
   const navigate = useNavigate();
@@ -298,30 +294,104 @@ function SquadPage() {
             </div>
 
             <section className="overflow-hidden rounded-[24px] border border-[#3d245b] bg-[#1a0f2a]">
-              <div className="relative rounded-[20px] border border-emerald-400/35 bg-[linear-gradient(180deg,#08985f_0%,#0c7f53_58%,#0a6b46_100%)] px-4 py-5 sm:px-5 sm:py-6">
-                <div className="pointer-events-none absolute inset-0 opacity-35">
-                  <div className="absolute inset-x-0 top-1/2 h-px bg-white/30" />
-                  <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-white/30" />
-                  <div className="absolute inset-3 rounded-[20px] border border-white/20" />
-                  <div className="absolute left-1/2 top-4 h-14 w-40 -translate-x-1/2 rounded-b-[24px] border border-white/20 border-t-0" />
-                  <div className="absolute left-1/2 bottom-4 h-14 w-40 -translate-x-1/2 rounded-t-[24px] border border-white/20 border-b-0" />
+              <div className="relative rounded-[20px] border-2 border-emerald-300/40 bg-[linear-gradient(135deg,#0d7a52_0%,#0e8f5a_25%,#0c7a4f_50%,#0a6b46_75%,#096642_100%)] px-4 py-8 sm:px-6 sm:py-10" style={{boxShadow: "inset 0 0 40px rgba(0,0,0,0.3)"}}>
+                {/* Enhanced Pitch Markings */}
+                <div className="pointer-events-none absolute inset-0 opacity-50">
+                  {/* Center Line - Thicker */}
+                  <div className="absolute inset-x-0 top-1/2 h-0.5 bg-white -translate-y-1/2" />
+                  {/* Vertical Line - Thicker */}
+                  <div className="absolute left-1/2 top-0 h-full w-0.5 bg-white -translate-x-1/2" />
+                  {/* Outer Border - Enhanced */}
+                  <div className="absolute inset-3 rounded-[20px] border-2 border-white/50" />
+                  
+                  {/* Center Circle - Larger and Visible */}
+                  <div className="absolute left-1/2 top-1/2 h-28 w-28 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/40" />
+                  <div className="absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/60" />
+                  
+                  {/* Top Goal Area - Penalty Box */}
+                  <div className="absolute left-1/2 top-3 h-14 w-72 -translate-x-1/2 border border-white/35 border-t-0" />
+                  {/* Top Goal Line Area */}
+                  <div className="absolute left-1/2 top-4 h-12 w-56 -translate-x-1/2 rounded-b-[16px] border border-white/35 border-t-0" />
+                  
+                  {/* Bottom Goal Area - Penalty Box */}
+                  <div className="absolute left-1/2 bottom-3 h-14 w-72 -translate-x-1/2 border border-white/35 border-b-0" />
+                  {/* Bottom Goal Line Area */}
+                  <div className="absolute left-1/2 bottom-4 h-12 w-56 -translate-x-1/2 rounded-t-[16px] border border-white/35 border-b-0" />
                 </div>
 
-                <div className={`relative space-y-4 ${view.locked ? "blur-[3px]" : ""}`}>
-                  {formationRows[view.formation].map((line) => (
-                    <div key={line} className="flex items-center justify-around gap-2 sm:gap-3">
-                      {view.players[line].map((player) => (
-                        <PlayerCard
-                          key={player.id}
-                          player={player}
-                          onSelect={(selected) => {
-                            setSelectedPlayer(selected);
-                            setStatusMessage(`Selected ${selected.name} from ${view.title}.`);
-                          }}
+                {/* Formation Layout */}
+                <div className={`relative space-y-8 ${view.locked ? "blur-[3px]" : ""}`}>
+                  {/* Goalkeeper Row */}
+                  <div className="flex flex-col items-center">
+                    <div className="mb-2 px-3 py-1 rounded-full bg-white/10 border border-white/20">
+                      <p className="text-xs font-bold text-white uppercase tracking-widest">GK</p>
+                    </div>
+                    <div className="flex gap-3">
+                      {view.players.GK.map((player) => (
+                        <PlayerCard 
+                          key={player.id} 
+                          player={player} 
+                          position="GKP"
+                          isHighlight={true}
+                          onSelect={(selected) => { setSelectedPlayer(selected); setStatusMessage(`Selected ${selected.name} from ${view.title}.`); }} 
                         />
                       ))}
                     </div>
-                  ))}
+                  </div>
+
+                  {/* Defenders Row */}
+                  <div className="flex flex-col items-center">
+                    <div className="mb-2 px-3 py-1 rounded-full bg-white/10 border border-white/20">
+                      <p className="text-xs font-bold text-white uppercase tracking-widest">DEF</p>
+                    </div>
+                    <div className="flex items-center justify-around w-full px-4">
+                      {view.players.DEF.map((player, idx) => (
+                        <PlayerCard 
+                          key={player.id} 
+                          player={player} 
+                          position="DEF"
+                          isHighlight={idx === 0}
+                          onSelect={(selected) => { setSelectedPlayer(selected); setStatusMessage(`Selected ${selected.name} from ${view.title}.`); }} 
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Midfielders Row */}
+                  <div className="flex flex-col items-center">
+                    <div className="mb-2 px-3 py-1 rounded-full bg-white/10 border border-white/20">
+                      <p className="text-xs font-bold text-white uppercase tracking-widest">MID</p>
+                    </div>
+                    <div className="flex items-center justify-around w-full px-2">
+                      {view.players.MID.map((player, idx) => (
+                        <PlayerCard 
+                          key={player.id} 
+                          player={player} 
+                          position="MID"
+                          isHighlight={idx === 0}
+                          onSelect={(selected) => { setSelectedPlayer(selected); setStatusMessage(`Selected ${selected.name} from ${view.title}.`); }} 
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Forwards Row */}
+                  <div className="flex flex-col items-center">
+                    <div className="mb-2 px-3 py-1 rounded-full bg-white/10 border border-white/20">
+                      <p className="text-xs font-bold text-white uppercase tracking-widest">FWD</p>
+                    </div>
+                    <div className="flex items-center justify-around w-full px-4">
+                      {view.players.FWD.map((player, idx) => (
+                        <PlayerCard 
+                          key={player.id} 
+                          player={player} 
+                          position="FWD"
+                          isHighlight={idx === 0}
+                          onSelect={(selected) => { setSelectedPlayer(selected); setStatusMessage(`Selected ${selected.name} from ${view.title}.`); }} 
+                        />
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
                 {view.locked ? (
@@ -337,7 +407,7 @@ function SquadPage() {
                       <button
                         onClick={() => {
                           setStatusMessage("Redirected to Premium plans.");
-                          navigate("/premium");
+                          navigate("/dashboard/premium");
                         }}
                         className="mt-4 w-full rounded-lg bg-emerald-400 px-3 py-2 text-sm font-bold text-[#072015]"
                       >
@@ -348,7 +418,7 @@ function SquadPage() {
                 ) : null}
               </div>
 
-              <div className="border-t border-[#321f49] bg-[#190d29] px-4 py-4 sm:px-5">
+              <div className={`border-t border-[#321f49] bg-[#190d29] px-4 py-4 sm:px-5 ${view.locked ? "blur-[3px]" : ""}`}>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-400">Bench</p>
                 <div className="mt-3 grid grid-cols-4 gap-2">
                   {view.bench.map((player) => (
@@ -402,9 +472,24 @@ function SquadPage() {
               onClick={() => setStatusMessage(`Transfer scout opened: ${item.name}.`)}
               className="flex w-full items-center justify-between rounded-xl border border-[#321f49] bg-[#190d29] px-4 py-3 text-left transition hover:border-emerald-400/35"
             >
-              <div>
-                <p className="font-semibold text-white">{item.name}</p>
-                <p className="text-xs text-slate-400">{item.details}</p>
+              <div className="flex items-center gap-3 flex-1">
+                <div>
+                  {item.type === "in" ? (
+                    <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/20 border border-emerald-400/50 px-2.5 py-1 text-xs font-bold text-emerald-300">
+                      <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                      IN
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 rounded-lg bg-rose-500/20 border border-rose-400/50 px-2.5 py-1 text-xs font-bold text-rose-300">
+                      <span className="h-2 w-2 rounded-full bg-rose-400" />
+                      OUT
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <p className="font-semibold text-white">{item.name}</p>
+                  <p className="text-xs text-slate-400">{item.details}</p>
+                </div>
               </div>
               <p className="text-sm font-bold text-emerald-300">{item.trend}</p>
             </button>
@@ -420,18 +505,56 @@ function SquadPage() {
   );
 }
 
-function PlayerCard({ player, onSelect }) {
+function PlayerCard({ player, onSelect, isHighlight, position }) {
   return (
     <button
       onClick={() => onSelect(player)}
-      className="w-[78px] rounded-lg bg-[#2b0f3f] p-2 text-center shadow-[0_8px_24px_rgba(0,0,0,0.2)] transition hover:brightness-110"
+      className={`group relative w-20 sm:w-24 rounded-xl p-3 text-center shadow-[0_8px_24px_rgba(0,0,0,0.3)] transition ${
+        isHighlight 
+          ? "bg-gradient-to-br from-emerald-400/30 to-emerald-500/20 border-2 border-white/60 hover:brightness-125 hover:shadow-[0_12px_32px_rgba(255,255,255,0.4)]" 
+          : "bg-[#2b0f3f] border border-white/10 hover:brightness-125 hover:shadow-[0_12px_32px_rgba(0,255,100,0.2)]"
+      }`}
     >
-      <div className="mx-auto grid h-8 w-8 place-items-center rounded-md bg-[#1a1327] text-slate-200">
-        <Shirt size={16} />
+      {/* Highlight Badge + Start/Bench Indicator */}
+      <div className="absolute -top-2 -right-2 flex gap-1">
+        {isHighlight && (
+          <div className="h-6 w-6 rounded-full bg-white/90 border-2 border-emerald-400 flex items-center justify-center">
+            <span className="text-[10px] font-bold text-[#072015]">★</span>
+          </div>
+        )}
+        <div className={`rounded-lg px-1.5 py-0.5 text-[9px] font-bold border ${
+          isHighlight 
+            ? "bg-emerald-400/80 text-white border-emerald-300" 
+            : "bg-slate-600/60 text-white border-slate-500"
+        }`}>
+          {isHighlight ? "Start" : "Bench"}
+        </div>
       </div>
-      <p className="mt-2 truncate text-[9px] font-bold tracking-[0.08em] text-white">{player.name}</p>
-      <p className="mt-1 text-[9px] text-slate-400">VS {player.opponent}</p>
-      <p className="text-[9px] font-semibold text-emerald-300">{player.proj.toFixed(1)}</p>
+      
+      {/* Position Badge */}
+      <div className="absolute -top-2 -left-2 h-5 w-5 rounded-full bg-slate-700/90 border border-slate-400 flex items-center justify-center text-[7px] font-bold text-white">
+        {position}
+      </div>
+      
+      {/* Shirt Icon */}
+      <div className={`mx-auto grid h-10 w-10 place-items-center rounded-lg mb-2 ${
+        isHighlight ? "bg-emerald-500/30 text-white" : "bg-[#1a1327] text-slate-200"
+      }`}>
+        <Shirt size={18} />
+      </div>
+      
+      {/* Player Name */}
+      <p className={`truncate text-xs font-bold tracking-wider uppercase ${
+        isHighlight ? "text-white" : "text-white"
+      }`}>{player.name}</p>
+      
+      {/* Opponent */}
+      <p className="mt-1 text-[10px] text-slate-300 uppercase">vs {player.opponent}</p>
+      
+      {/* Projected Points */}
+      <p className={`mt-2 text-sm font-bold ${
+        isHighlight ? "text-white" : "text-emerald-300"
+      }`}>{player.proj.toFixed(1)}</p>
     </button>
   );
 }

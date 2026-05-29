@@ -10,6 +10,12 @@ const INITIAL_FORM_STATE = {
 
 const AUTH_STORAGE_KEY = "authUser";
 
+// Static admin user credentials
+const ADMIN_USER = {
+  email: "admin@fplytics.app",
+  password: "admin123",
+};
+
 const buildLocalUser = (email) => {
   const normalizedEmail = email.trim().toLowerCase();
   const emailPrefix = normalizedEmail.split("@")[0] || normalizedEmail;
@@ -57,6 +63,11 @@ function Login() {
     setErrorMessage("");
 
     const localUser = buildLocalUser(formData.email);
+    
+    // Check if this is the static admin user FIRST
+    const isAdminLogin = 
+      formData.email.toLowerCase() === ADMIN_USER.email && 
+      formData.password === ADMIN_USER.password;
 
     try {
       // API Integration: http://127.0.0.1:8000/api/login/
@@ -70,27 +81,31 @@ function Login() {
         localStorage.setItem("authToken", response.token);
       }
 
+      // Set admin status: true for static admin user, false for all others
       localStorage.setItem(
         AUTH_STORAGE_KEY,
         JSON.stringify({
           ...localUser,
           token: response.token || "",
+          is_admin: isAdminLogin,
         }),
       );
 
       // Redirect to dashboard
-      navigate("/");
+      navigate("/dashboard");
     } catch (error) {
+      // Even if API fails, if it's the admin user, mark them as admin
       localStorage.removeItem("authToken");
       localStorage.setItem(
         AUTH_STORAGE_KEY,
         JSON.stringify({
           ...localUser,
           token: "",
+          is_admin: isAdminLogin,
         }),
       );
 
-      navigate("/");
+      navigate("/dashboard");
     } finally {
       setIsSubmitting(false);
     }
@@ -106,11 +121,12 @@ function Login() {
       JSON.stringify({
         ...localUser,
         token: "",
+        is_admin: false,
       }),
     );
 
     setHelperMessage(`${provider} sign-in completed in demo mode.`);
-    navigate("/");
+    navigate("/dashboard");
   };
 
   const openHelpResource = (type) => {

@@ -153,12 +153,34 @@ function ComparePage() {
         </div>
 
         <div className="rounded-3xl border border-[#3d245b] bg-[#1e102f] p-5">
-          <h2 className="text-lg font-bold text-white">Manager note</h2>
-          <p className="mt-3 text-sm text-slate-300">
-            {leftPlayer.name} is the better fit for pure output, while {rightPlayer.name} has the stronger all-round ceiling.
-          </p>
-          <div className="mt-4 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm text-emerald-100">
-            This page is fully interactive: change either selector and the comparison updates immediately.
+          <h2 className="text-lg font-bold text-white mb-4">Upcoming Matches</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-[#3c2458]">
+                  <th className="px-4 py-3 text-left text-xs font-bold text-emerald-300 uppercase">Date</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-emerald-300 uppercase">Team 1</th>
+                  <th className="px-4 py-3 text-center text-xs font-bold text-emerald-300 uppercase">vs</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-emerald-300 uppercase">Team 2</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-emerald-300 uppercase">Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { date: "May 30, 2026", team1: "Liverpool", team2: "Manchester United", time: "19:45" },
+                  { date: "May 31, 2026", team1: "Arsenal", team2: "Chelsea", time: "17:30" },
+                  { date: "Jun 01, 2026", team1: "Manchester City", team2: "Tottenham", time: "20:00" },
+                ].map((match, idx) => (
+                  <tr key={idx} className="border-b border-[#3c2458] hover:bg-[#241239]/50 transition">
+                    <td className="px-4 py-3 text-slate-300">{match.date}</td>
+                    <td className="px-4 py-3 font-semibold text-white">{match.team1}</td>
+                    <td className="px-4 py-3 text-center text-slate-400">vs</td>
+                    <td className="px-4 py-3 font-semibold text-white">{match.team2}</td>
+                    <td className="px-4 py-3 text-emerald-400">{match.time}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

@@ -3,13 +3,11 @@ import Login from "./Login";
 import Register from "./Register";
 import Profile from "./Profile";
 import DashboardLayout from "./DashboardLayout";
+import ProtectedAdminRoute from "./ProtectedAdminRoute";
 import {
   Home,
   Squad,
-  Transfers,
   Stats,
-  Alerts,
-  More,
   ComparePage,
   PremiumPage,
   CheckoutPage,
@@ -20,26 +18,28 @@ function App() {
   return (
     <HashRouter>
       <Routes>
-        {/* Authentication routes */}
+        {/* Authentication routes - NO sidebar */}
+        <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/admin" element={<AdminPage />} />
 
-        {/* Dashboard and its nested routes */}
+        {/* Dashboard routes WITH sidebar */}
         <Route element={<DashboardLayout />}>
-          <Route index element={<Home />} />
-          <Route path="squad" element={<Squad />} />
-          <Route path="transfers" element={<Transfers />} />
-          <Route path="stats" element={<Stats />} />
-          <Route path="alerts" element={<Alerts />} />
-          <Route path="more" element={<More />} />
-          <Route path="compare" element={<ComparePage />} />
-          <Route path="premium" element={<PremiumPage />} />
-          <Route path="checkout" element={<CheckoutPage />} />
-          <Route path="profile" element={<Profile />} />
+          <Route path="/dashboard" element={<Home />} />
+          <Route path="/dashboard/squad" element={<Squad />} />
+          <Route path="/dashboard/stats" element={<Stats />} />
+          <Route path="/dashboard/compare" element={<ComparePage />} />
+          <Route path="/dashboard/premium" element={<PremiumPage />} />
+          <Route path="/dashboard/checkout" element={<CheckoutPage />} />
+          <Route path="/dashboard/profile" element={<Profile />} />
         </Route>
 
-        {/* Prevent blank screen when URL does not match */}
+        {/* Admin route - protected WITH sidebar */}
+        <Route element={<DashboardLayout />}>
+          <Route path="/dashboard/admin" element={<ProtectedAdminRoute element={<AdminPage />} />} />
+        </Route>
+
+        {/* Fallback redirect to login */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </HashRouter>

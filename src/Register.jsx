@@ -10,6 +10,8 @@ const INITIAL_FORM_STATE = {
   confirmPassword: "",
 };
 
+const AUTH_STORAGE_KEY = "authUser";
+
 function Register() {
   const [formData, setFormData] = useState(INITIAL_FORM_STATE);
   const [showPassword, setShowPassword] = useState(false);
@@ -64,6 +66,21 @@ function Register() {
       if (response.token) {
         localStorage.setItem("authToken", response.token);
       }
+
+      // Extract admin role from API response (usually false for new registrations)
+      const isAdmin = response.is_admin || response.is_staff || false;
+
+      // Store user data with admin status
+      localStorage.setItem(
+        AUTH_STORAGE_KEY,
+        JSON.stringify({
+          email: formData.email,
+          username: formData.username,
+          fpl_team_name: `${formData.username}'s Team`,
+          token: response.token || "",
+          is_admin: isAdmin,
+        }),
+      );
 
       // Redirect to dashboard
       navigate("/");

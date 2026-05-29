@@ -52,7 +52,7 @@ function CheckoutPage() {
               }`}
             >
               <span className="block text-sm font-semibold">{option.label}</span>
-              <span className="block text-xs text-slate-400">{option.key === "card" ? "Visa / Mastercard" : "Apple Pay / Google Pay"}</span>
+              <span className="block text-xs text-slate-400">{option.key === "card" ? "Visa / Mastercard" : "Google Pay"}</span>
             </button>
           ))}
         </div>
@@ -103,7 +103,7 @@ function CheckoutPage() {
           </div>
         </div>
 
-        <button type="button" onClick={() => navigate("/premium")} className="mt-5 w-full rounded-2xl border border-[#4d2f70] px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-emerald-400 hover:text-white">
+        <button type="button" onClick={() => navigate("/dashboard/premium")} className="mt-5 w-full rounded-2xl border border-[#4d2f70] px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-emerald-400 hover:text-white">
           Back to Plans
         </button>
       </aside>
