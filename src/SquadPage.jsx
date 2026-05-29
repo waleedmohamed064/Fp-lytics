@@ -294,38 +294,30 @@ function SquadPage() {
             </div>
 
             <section className="overflow-hidden rounded-[24px] border border-[#3d245b] bg-[#1a0f2a]">
-              <div className="relative rounded-[20px] border-2 border-emerald-300/40 bg-[linear-gradient(135deg,#0d7a52_0%,#0e8f5a_25%,#0c7a4f_50%,#0a6b46_75%,#096642_100%)] px-4 py-8 sm:px-6 sm:py-10" style={{boxShadow: "inset 0 0 40px rgba(0,0,0,0.3)"}}>
-                {/* Enhanced Pitch Markings */}
-                <div className="pointer-events-none absolute inset-0 opacity-50">
-                  {/* Center Line - Thicker */}
-                  <div className="absolute inset-x-0 top-1/2 h-0.5 bg-white -translate-y-1/2" />
-                  {/* Vertical Line - Thicker */}
-                  <div className="absolute left-1/2 top-0 h-full w-0.5 bg-white -translate-x-1/2" />
-                  {/* Outer Border - Enhanced */}
-                  <div className="absolute inset-3 rounded-[20px] border-2 border-white/50" />
+              <div className="relative rounded-[20px] border-2 border-emerald-300/40 bg-[#1a7a43] px-4 py-8 sm:px-6 sm:py-10" style={{boxShadow: "inset 0 0 40px rgba(0,0,0,0.3)"}}>
+                {/* Grass Stripes - Lighter Green */}
+                <div className="pointer-events-none absolute top-[20%] left-0 w-full h-[15%] bg-[#28a745]/60" />
+                <div className="pointer-events-none absolute bottom-[20%] left-0 w-full h-[15%] bg-[#28a745]/60" />
+
+                {/* Pitch Markings - White Lines */}
+                <div className="pointer-events-none absolute inset-0">
+                  {/* Center Line */}
+                  <div className="absolute top-1/2 left-0 w-full h-[2px] bg-white -translate-y-1/2" />
                   
-                  {/* Center Circle - Larger and Visible */}
-                  <div className="absolute left-1/2 top-1/2 h-28 w-28 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white/40" />
-                  <div className="absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/60" />
+                  {/* Center Circle */}
+                  <div className="absolute top-1/2 left-1/2 w-28 h-28 border-[2px] border-white rounded-full -translate-x-1/2 -translate-y-1/2" />
                   
-                  {/* Top Goal Area - Penalty Box */}
-                  <div className="absolute left-1/2 top-3 h-14 w-72 -translate-x-1/2 border border-white/35 border-t-0" />
-                  {/* Top Goal Line Area */}
-                  <div className="absolute left-1/2 top-4 h-12 w-56 -translate-x-1/2 rounded-b-[16px] border border-white/35 border-t-0" />
+                  {/* Top Penalty Box */}
+                  <div className="absolute top-0 left-1/2 w-[45%] h-[15%] border-[2px] border-white border-t-0 -translate-x-1/2" />
                   
-                  {/* Bottom Goal Area - Penalty Box */}
-                  <div className="absolute left-1/2 bottom-3 h-14 w-72 -translate-x-1/2 border border-white/35 border-b-0" />
-                  {/* Bottom Goal Line Area */}
-                  <div className="absolute left-1/2 bottom-4 h-12 w-56 -translate-x-1/2 rounded-t-[16px] border border-white/35 border-b-0" />
+                  {/* Bottom Penalty Box */}
+                  <div className="absolute bottom-0 left-1/2 w-[45%] h-[15%] border-[2px] border-white border-b-0 -translate-x-1/2" />
                 </div>
 
                 {/* Formation Layout */}
-                <div className={`relative space-y-8 ${view.locked ? "blur-[3px]" : ""}`}>
+                <div className={`relative z-10 space-y-8 ${view.locked ? "blur-[3px]" : ""}`}>
                   {/* Goalkeeper Row */}
                   <div className="flex flex-col items-center">
-                    <div className="mb-2 px-3 py-1 rounded-full bg-white/10 border border-white/20">
-                      <p className="text-xs font-bold text-white uppercase tracking-widest">GK</p>
-                    </div>
                     <div className="flex gap-3">
                       {view.players.GK.map((player) => (
                         <PlayerCard 
@@ -341,9 +333,6 @@ function SquadPage() {
 
                   {/* Defenders Row */}
                   <div className="flex flex-col items-center">
-                    <div className="mb-2 px-3 py-1 rounded-full bg-white/10 border border-white/20">
-                      <p className="text-xs font-bold text-white uppercase tracking-widest">DEF</p>
-                    </div>
                     <div className="flex items-center justify-around w-full px-4">
                       {view.players.DEF.map((player, idx) => (
                         <PlayerCard 
@@ -359,9 +348,6 @@ function SquadPage() {
 
                   {/* Midfielders Row */}
                   <div className="flex flex-col items-center">
-                    <div className="mb-2 px-3 py-1 rounded-full bg-white/10 border border-white/20">
-                      <p className="text-xs font-bold text-white uppercase tracking-widest">MID</p>
-                    </div>
                     <div className="flex items-center justify-around w-full px-2">
                       {view.players.MID.map((player, idx) => (
                         <PlayerCard 
@@ -377,9 +363,6 @@ function SquadPage() {
 
                   {/* Forwards Row */}
                   <div className="flex flex-col items-center">
-                    <div className="mb-2 px-3 py-1 rounded-full bg-white/10 border border-white/20">
-                      <p className="text-xs font-bold text-white uppercase tracking-widest">FWD</p>
-                    </div>
                     <div className="flex items-center justify-around w-full px-4">
                       {view.players.FWD.map((player, idx) => (
                         <PlayerCard 
@@ -395,13 +378,13 @@ function SquadPage() {
                 </div>
 
                 {view.locked ? (
-                  <div className="absolute inset-0 grid place-items-center p-4">
-                    <div className="w-full max-w-[230px] rounded-2xl border border-[#4d2f70] bg-[#2a1140]/95 p-4 text-center shadow-[0_20px_60px_rgba(0,0,0,0.5)]">
-                      <div className="mx-auto grid h-9 w-9 place-items-center rounded-full bg-emerald-400/15 text-emerald-300">
-                        <Lock size={16} />
+                  <div className="absolute inset-0 z-20 flex items-center justify-center p-4 rounded-[20px]" style={{backdropFilter: "blur(4px)", backgroundColor: "rgba(0, 0, 0, 0.4)"}}>
+                    <div className="w-full max-w-xs rounded-2xl border border-emerald-400/40 bg-[#1e102f] p-6 text-center shadow-[0_20px_60px_rgba(0,230,118,0.15)]">
+                      <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-emerald-400/20 border border-emerald-400/50 text-emerald-300">
+                        <Lock size={20} />
                       </div>
-                      <p className="mt-3 font-semibold text-white">Unlock AI Predictions</p>
-                      <p className="mt-2 text-xs text-slate-400">
+                      <p className="mt-4 text-lg font-bold text-white">Unlock AI Predictions</p>
+                      <p className="mt-2 text-sm text-slate-300">
                         Get access to elite team optimization and projected points.
                       </p>
                       <button
@@ -409,7 +392,7 @@ function SquadPage() {
                           setStatusMessage("Redirected to Premium plans.");
                           navigate("/dashboard/premium");
                         }}
-                        className="mt-4 w-full rounded-lg bg-emerald-400 px-3 py-2 text-sm font-bold text-[#072015]"
+                        className="mt-5 w-full rounded-lg bg-emerald-400 px-4 py-2.5 text-sm font-bold text-[#072015] transition hover:brightness-110"
                       >
                         Upgrade to Pro
                       </button>
@@ -509,11 +492,7 @@ function PlayerCard({ player, onSelect, isHighlight, position }) {
   return (
     <button
       onClick={() => onSelect(player)}
-      className={`group relative w-20 sm:w-24 rounded-xl p-3 text-center shadow-[0_8px_24px_rgba(0,0,0,0.3)] transition ${
-        isHighlight 
-          ? "bg-gradient-to-br from-emerald-400/30 to-emerald-500/20 border-2 border-white/60 hover:brightness-125 hover:shadow-[0_12px_32px_rgba(255,255,255,0.4)]" 
-          : "bg-[#2b0f3f] border border-white/10 hover:brightness-125 hover:shadow-[0_12px_32px_rgba(0,255,100,0.2)]"
-      }`}
+      className="group relative w-20 sm:w-24 rounded-xl p-3 text-center shadow-[0_8px_24px_rgba(0,0,0,0.3)] transition bg-[#241239] border border-slate-600 hover:brightness-125 hover:shadow-[0_12px_32px_rgba(0,255,100,0.2)]"
     >
       {/* Highlight Badge + Start/Bench Indicator */}
       <div className="absolute -top-2 -right-2 flex gap-1">
@@ -537,24 +516,18 @@ function PlayerCard({ player, onSelect, isHighlight, position }) {
       </div>
       
       {/* Shirt Icon */}
-      <div className={`mx-auto grid h-10 w-10 place-items-center rounded-lg mb-2 ${
-        isHighlight ? "bg-emerald-500/30 text-white" : "bg-[#1a1327] text-slate-200"
-      }`}>
+      <div className="mx-auto grid h-10 w-10 place-items-center rounded-lg mb-2 bg-[#1a1327] text-slate-200">
         <Shirt size={18} />
       </div>
       
       {/* Player Name */}
-      <p className={`truncate text-xs font-bold tracking-wider uppercase ${
-        isHighlight ? "text-white" : "text-white"
-      }`}>{player.name}</p>
+      <p className="truncate text-xs font-bold tracking-wider uppercase text-white">{player.name}</p>
       
       {/* Opponent */}
       <p className="mt-1 text-[10px] text-slate-300 uppercase">vs {player.opponent}</p>
       
       {/* Projected Points */}
-      <p className={`mt-2 text-sm font-bold ${
-        isHighlight ? "text-white" : "text-emerald-300"
-      }`}>{player.proj.toFixed(1)}</p>
+      <p className="mt-2 text-sm font-bold text-emerald-300">{player.proj.toFixed(1)}</p>
     </button>
   );
 }
